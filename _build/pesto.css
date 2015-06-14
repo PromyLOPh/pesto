@@ -1,0 +1,49 @@
+/* basic typography stuff */
+html {
+	font-size: 100%;
+	line-height: 1.4;
+	font-family: 'PT Sans', sans-serif;
+	text-rendering: optimizeLegibility;
+	-moz-hyphens: auto;
+	-webkit-hyphens: auto;
+	hyphens: auto;
+	text-align: justify;
+	color: #444;
+	background-image: url(bg.png);
+}
+
+.wrapper {
+	max-width: 40em;
+	margin: 0 auto;
+}
+
+a:link, a:visited {
+	/* tango sky blue 3 */
+	color: #204a87;
+}
+
+div.sourceCode {
+	overflow: visible;
+}
+
+pre.sourceCode {
+	margin-left: 0;
+	margin-right: 0;
+	/* tango aluminium 1 */
+	background-color: #eeeeec;
+	padding: 1em;
+	/* tango aluminium 2 */
+	border: 0.1em solid #d3d7cf;
+}
+
+pre code {
+	background-color: transparent;
+}
+
+.todo {
+	border: 0.1em solid #edd400;
+	background-color: #fce94f;
+	padding: 0em 1em;
+	border-radius: 0.66em;
+}
+

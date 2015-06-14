@@ -1,0 +1,20 @@
+> module Codec.Pesto.Parse where
+
+> data Operation =
+> 	  Annotation String
+> 	| Ingredient Quantity
+> 	| Tool Quantity
+> 	| Action String
+> 	| Reference Quantity
+> 	| Result Object
+> 	| Alternative Object
+> data Quantity = Quantity Approximately Unit Object
+> type Unit = String
+> type Object = String
+> data Approximately =
+> 	  Range Amount Amount
+> 	| Approx Amount
+> 	| Exact Amount
+> data Amount =
+> 	  AmountRatio Rational
+> 	| AmountStr String

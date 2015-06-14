@@ -1,0 +1,4 @@
+*.sw?
+cabal.sandbox.config
+.cabal-sandbox/
+_build/index.html
