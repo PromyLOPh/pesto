@@ -12,12 +12,13 @@ Language syntax
 > 	, Object(..)
 > 	, Approximately(..)
 > 	, Amount(..)
-> 	, Recipe(..)
 > 	, isResult
 > 	, isReference
 > 	, isAlternative
 > 	, isAnnotation
 > 	, isAction
+> 	, isDirective
+> 	, isUnknown
 > 	, spaces1
 > 	, notspace
 > 	) where
@@ -33,50 +34,21 @@ Language syntax
 >
 > import Codec.Pesto.Serialize (serialize)
 
-XXX: magic should be an operation
-XXX: this parser should accept invalid operations
+Pesto parses UTF-8_ encoded input files into a sequence of operations.
 
-From the XXXsyntactic point of view a Pesto recipe is just a list of
-space-delimited operations. It is encoded with UTF-8_ and starts with a magic
-identifier (``%pesto-1``) followed by one or more spaces (spaces1_). Every
+- stream of operations
+- utf8 encoded
+Every
 character within the Unicode whitespace class is considered a space.
 
 .. _UTF-8: https://tools.ietf.org/html/rfc3629
-
 .. _spaces1:
-.. _Recipe:
 
-> data Recipe = Recipe {
-> 	  version :: Integer
-> 	, operations :: [(SourcePos, Operation)]
-> 	} deriving Show
-> 
-> recipe = Recipe
-> 	<$> magic <* spaces1
-> 	<*> ((,) <$> getPosition <*> operation) `sepEndBy` spaces1
-> 	<*  eof
-> 	<?> "recipe"
-> 
+> stream = ((,) <$> getPosition <*> operation) `sepEndBy` spaces1
+> 	<?> "stream"
 > spaces1 = many1 space
 
-The file identifier consists of the string ``%pesto-`` followed by an integral
-number and arbitrary non-space characters. They are reserved for future use and
-must be ignored by parsers implementing this version of pesto. A byte order
-mark (BOM) must not be used.
-
-> magic = string "%pesto-" *> int <* skipMany notspace <?> "magic"
-> notspace = satisfy (not . isSpace)
-
-.. _Operation:
-.. _Ingredient:
-.. _Tool:
-.. _Result:
-.. _Alternative:
-.. _Reference:
-.. _Annotation:
-.. _Action:
-
-The following *operations* are supported:
+The following operations are supported:
 
 > data Operation =
 > 	  Annotation String
@@ -86,6 +58,8 @@ The following *operations* are supported:
 > 	| Reference Quantity
 > 	| Result Object
 > 	| Alternative Object
+> 	| Directive String
+> 	| Unknown String
 > 	deriving (Show, Eq)
 >
 > operation =
@@ -96,6 +70,8 @@ The following *operations* are supported:
 > 	<|> try result
 > 	<|> try alternative
 > 	<|> try reference
+> 	<|> try directive
+> 	<|> try unknown
 > 	<?> "operation"
 
 The pesto grammar has two kinds of operations: The first one begins with a
@@ -129,6 +105,19 @@ whitespace characters and then consumes an object or a quantity.
 > alternative = oparg '|' (Alternative <$> object)
 > reference = oparg '*' (Reference <$> quantity)
 
+Additionally there are two special operations. Directives are similar to the
+previous operations, but consume a qstr.
+
+> directive = oparg '%' (Directive <$> qstr)
+
+Unknown operations are the fallthrough-case and accept anything. They must not
+be discarded at this point. The point of accepting anything is to fail as late
+as possible while processing Pesto documents. This gives us a chance to print
+helpful mesages that provide additional aid to the user who can then fix the
+problem.
+
+> unknown = Unknown <$> many1 notspace
+
 > testOparg = [
 > 	  cmpOperation "+100 g flour" (Right (Ingredient (Quantity (Exact (AmountRatio (100%1))) "g" "flour")))
 
@@ -136,6 +125,7 @@ whitespace characters and then consumes an object or a quantity.
 > 	, cmpOperation ">dough" (Right (Result "dough"))
 > 	, cmpOperation "|trimmings" (Right (Alternative "trimmings"))
 > 	, cmpOperation "*fish" (Right (Reference (Quantity (Exact (AmountStr "")) "" "fish")))
+> 	, cmpOperation3 "% invalid" (Right (Directive "invalid")) "%invalid"
 > 	, cmpOperation3 "* \t\n 1 _ cheese" (Right (Reference (Quantity (Exact (AmountRatio (1%1))) "" "cheese"))) "*1 _ cheese"
 > 	]
 
@@ -155,6 +145,7 @@ A word always starts with a letter, followed by any number of non-space
 characters.
 
 > word = (:) <$> letter <*> many notspace
+> notspace = satisfy (not . isSpace)
 
 The empty string can be represented by two double quotes or the underscore, but
 not the empty string itself.
@@ -347,7 +338,7 @@ Appendix
 ++++++++
 
 > int = read <$> many1 digit
-> parse = runParser recipe () ""
+> parse = runParser stream () ""
 
 Test helpers:
 
@@ -394,4 +385,8 @@ Wrap qstr test in AmountStr to aid serialization test
 > isAnnotation _ = False
 > isAction (Action _) = True
 > isAction _ = False
+> isDirective (Directive _) = True
+> isDirective _ = False
+> isUnknown (Unknown _) = True
+> isUnknown _ = False
 

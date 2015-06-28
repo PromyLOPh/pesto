@@ -8,6 +8,8 @@
 > 	| Reference Quantity
 > 	| Result Object
 > 	| Alternative Object
+> 	| Directive String
+> 	| Unknown String
 > data Quantity = Quantity Approximately Unit Object
 > type Unit = String
 > type Object = String

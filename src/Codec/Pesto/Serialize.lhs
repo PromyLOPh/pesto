@@ -31,6 +31,8 @@ Finally transform linear stream of operations into a string again:
 > 	serialize (Reference q) = '*':serialize q
 > 	serialize (Result s) = '>':serializeQstr s
 > 	serialize (Alternative s) = '|':serializeQstr s
+> 	serialize (Directive s) = '%':serializeQstr s
+> 	serialize (Unknown s) = s
 
 > instance Serializeable Quantity where
 > 	serialize (Quantity a b "") = serialize a ++ " " ++ serializeQstr b

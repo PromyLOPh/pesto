@@ -4,8 +4,8 @@ User interface
 .. class:: nodoc
 
 > module Main (main) where
-> import Codec.Pesto.Parse (parse, Recipe(..))
-> import Codec.Pesto.Graph (toGraph, firstNodeId, resolveReferences)
+> import Codec.Pesto.Parse (parse)
+> import Codec.Pesto.Graph (extract, toGraph, firstNodeId, resolveReferences)
 > import Codec.Pesto.Lint (lint)
 > import Codec.Pesto.Dot (toDot)
 
@@ -23,9 +23,10 @@ add linting information to graph
 
 > main = do
 > 	s <- getContents
->	(flip . either) malformedRecipe (parse s) $ \doc -> do
+>	(flip . either) malformedRecipe (parse s) $ \stream -> do
 > 		let
-> 			nodes = (zip [firstNodeId..] . snd . unzip . operations) doc
+> 			doc = (head . extract . snd . unzip) stream
+> 			nodes = zip [firstNodeId..] doc
 > 			edges = toGraph nodes ++ resolveReferences nodes
 > 		--print $ lint nodes edges
 > 		putStrLn $ toDot nodes edges

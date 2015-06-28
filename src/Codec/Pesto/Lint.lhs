@@ -17,7 +17,7 @@ Not every graph generated in the previous section is a useful recipe, since
 some combinations of operations just do not make sense. The linting test in
 this section can detect common errors. Failing any of these tests does not
 render a recipe invalid, but *useless*. Thus implementations must not create
-such recipes. They may be accepted as input from the user.
+such recipes. They may be accepted the user though.
 
 Every lint test checks a single aspect of the graph.
 
@@ -32,12 +32,13 @@ Metadata
 The graph must have exactly one root node (i.e. a node with incoming edges
 only) and it must be a result. The result’s object name is the recipe’s title.
 This also requires all results and alternatives to be referenced somewhere.
+Directives are either consumed when parsing, generating a graph and linting.
+Otherwise they are dangling as well. Unknown operations are always dangling.
 
 > rootIsResult nodes edges = case walkRoot nodes edges of
 > 	[] -> [LintResult NoRootNode []]
 > 	(i, x):[] -> if isResult x then [] else [LintResult NonResultRootNode [i]]
 > 	xs -> [LintResult MoreThanOneRootNode (map fst xs)]
-
 
 Empty recipes or circular references have no root node:
 
@@ -49,6 +50,10 @@ Empty recipes or circular references have no root node:
 This recipe’s title is “Pesto”.
 
 > 	, cmpLint "+foobar >Pesto" []
+
+Directives and unknown operations are dangling and thus root nodes.
+
+> 	, cmpLint "invalid %invalid +foo >bar" [LintResult MoreThanOneRootNode [0,1,3]]
 >	]
 
 Additional key-value metadata for the whole recipe can be provided by adding
@@ -291,6 +296,7 @@ Appendix
 >	| UnitNotWellKnown
 > 	| UnknownMetadataKey
 > 	| InvalidMetadata
+> 	| InvalidNode
 > 	deriving (Show, Eq, Ord)
 
 > lintTests = [
@@ -306,8 +312,8 @@ Appendix
 
 > cmpLint doc expect = doc ~: sort (lint nodes edges) ~?= sort expect
 > 	where
-> 		(Right op) = parse ("%pesto-1 " ++ doc)
-> 		nodes = (zip [firstNodeId..] . map snd . operations) op
+> 		(Right op) = (head . extract . snd . unzip) <$> parse ("%pesto " ++ doc)
+> 		nodes = zip [firstNodeId..] op
 > 		edges = toGraph nodes ++ resolveReferences nodes
 
 > test = [
