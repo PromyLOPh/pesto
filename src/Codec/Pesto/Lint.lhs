@@ -281,6 +281,30 @@ should we allow this? it does not make sense imo
 - reject loops
 - reject multiple results/alternatives with the same name
 
+Ranges
+++++++
+
+The first amount of a range ratio must be strictly smaller than the second.
+This limitation is not enforced for ranges containing strings.
+
+> rangeFromLargerThanTo nodes edges = foldl f [] nodes
+> 	where
+>		f xs n@(nodeid, Ingredient q) | not $ rangeOk q =
+> 				LintResult RangeFromLargerThanTo [nodeid]:xs
+>		f xs n@(nodeid, Reference q) | not $ rangeOk q =
+> 				LintResult RangeFromLargerThanTo [nodeid]:xs
+>		f xs _ = xs
+> 		rangeOk (Quantity (Range (AmountRatio a) (AmountRatio b)) _ _) = a < b
+> 		rangeOk _ = True
+
+> testRangeFromLargerThanTo = [
+> 	  cmpLint "+2-3 l water >bar" []
+> 	, cmpLint "+3-2 l water >bar" [LintResult RangeFromLargerThanTo [0]]
+> 	, cmpLint "+2/3-1/3 l water >bar" [LintResult RangeFromLargerThanTo [0]]
+> 	, cmpLint "+some-many _ eggs >bar" []
+> 	, cmpLint "+1-\"a few\" _ eggs >bar" []
+> 	]
+
 Appendix
 ++++++++
 
@@ -297,6 +321,7 @@ Appendix
 > 	| UnknownMetadataKey
 > 	| InvalidMetadata
 > 	| InvalidNode
+> 	| RangeFromLargerThanTo
 > 	deriving (Show, Eq, Ord)
 
 > lintTests = [
@@ -308,6 +333,7 @@ Appendix
 > 	, timeAnnotatesAction
 > 	, wellKnownUnit
 > 	, rootAnnotations
+> 	, rangeFromLargerThanTo
 > 	]
 
 > cmpLint doc expect = doc ~: sort (lint nodes edges) ~?= sort expect
@@ -325,5 +351,6 @@ Appendix
 > 	, testTimeAnnotatesAction
 > 	, testLintTwoAlternatives
 > 	, testLintResultNonempty
+> 	, testRangeFromLargerThanTo
 > 	]
 
