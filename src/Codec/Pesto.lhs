@@ -56,55 +56,100 @@ The landscape of recipe interchange formats is quite fragmented. First of all
 there’s HTML microdata. `Google rich snippets`_, which are equivalent to the
 schema.org_ microdata vocabulary, are widely used by commercial recipe sites.
 Although the main objective of microdata is to make content machine-readable
-most sites will probably do so, because it is considered a search-engine
+most sites will probably use it, because it is considered a search-engine
 optimization (SEO). Additionally parsing HTML pulled from the web is a
 nightmare and thus not a real option for sharing recipes. h-recipe_ provides a
-second vocabulary, but has not been adopted widely.
+second vocabulary that has not been adopted widely yet.
 
 .. _Google rich snippets: https://developers.google.com/structured-data/rich-snippets/recipes
 .. _schema.org: http://schema.org/Recipe
 .. _h-recipe: http://microformats.org/wiki/h-recipe
 
-Mealmaster_, an ancient file format with – due to its age – many problems,
-seems to have the most traction right now. A large amount of recipe files is
-`available in this format <http://www.ffts.com/recipes.htm>`_. Rezkonv_ aims to
-improve the Mealmaster format. However the specification is available on
-request only. Another text-based format, MXP_ (plus MX2, MZ2), is used by
-Mastercook.
+Most cooking-related software comes with their own recipe file format.
+Meal-Master_ is one example and, due to its age, a large amount of recipe files
+is `available in this format <http://www.ffts.com/recipes.htm>`_. There does
+not seem to be any official documentation for the format, but an inofficial
+`ABNF grammar`_ exists. A Meal-Master recipe template might look like this:
 
-A newer format, YumML_, is based on YAML. The specification has been removed
-from the web and is available through the Web Archive only.
+.. code:: mealmaster
+
+    ---------- Recipe via Meal-Master (tm)
+
+          Title: <Title>
+     Categories: <Categories>
+          Yield: <N servings>
+
+        <N> <unit> <ingredient>
+        …
+
+    -------------------------------<Section name>-----------------------------
+      <More ingredients>
+
+      <Instructions>
+
+    -----
+
+Rezkonv_ aims to improve the Mealmaster format by lifting some of its character
+limits, adding new syntax and translating it to german. However the
+specification is available on request only. Early versions of MasterCook_
+used the MXP_ file format, but newer software versions use, beside a bunch of
+other file formats, the XML-based MX2.
 
 .. _xml-formats:
 
-There’s a number of XML-based formats:
-RecipeML_, formerly known as DESSERT was released in 2002 (version 0.5). The
-license requires attribution and – at the same time – forbids using the name
-RecipeML for promotion without written permission.
-REML_ was released in 2005 (version 0.5). It is rather complicated and has no
-license.
-`RecipeBook XML`_, released in 2005 as well and shared unter the terms of `CC
-by-sa`_ is not available on the web any more.
-CookML_, created in 2006 (version 1.0.4) for the german-language shareware
-program Kalorio has a custom and restrictive licence that requires attribution and
-forbids derivate works.
-KRecipes_ uses its own export format. However there is no documentation
-whatsoever. Gourmet_’s export format suffers from the same problem. The only
-document available is the `DTD
-<https://github.com/thinkle/gourmet/blob/7715c6ef87ee8c106f0a021972cd70d61d83cadb/data/recipe.dtd>`_.
+In general XML seems to be the preferred markup language for a bunch of
+interchange formats created around 2005.
+
+RecipeML_
+	Formerly known as DESSERT and released in 2002 (version 0.5). The
+	license requires attribution and – at the same time – forbids using the name
+	RecipeML for promotion without written permission.
+eatdrinkfeelgood_
+	Version 1.1 was released in 2002 as well, but the site is not online
+	anymore. The DTD is licensed under the `CC by-sa`_ license.
+REML_
+	Released in 2005 (version 0.5), aims to improve support for commercial uses
+	(restaurant menus and cookbooks). The XSD’s license permits free use and
+	redistribution, but the reference implementation has no licensing
+	information.
+`RecipeBook XML`_
+	Released 2005 as well and shared unter the terms of `CC by-sa`_ is not
+	available on the web any more.
+CookML_
+	Last updated in 2006 (version 1.0.4) for the german-language shareware
+	program Kalorio has a custom and restrictive licence that requires
+	attribution and forbids derivate works.
+KRecipes_
+	Uses its own export format. However there is no documentation whatsoever.
+Gourmet_
+	The program’s export format suffers from the same problem. The only
+	document available is the `DTD
+	<https://github.com/thinkle/gourmet/blob/7715c6ef87ee8c106f0a021972cd70d61d83cadb/data/recipe.dtd>`_.
 
 .. _CC by-sa: https://creativecommons.org/licenses/by-sa/2.5/
 
-All of the formats above share a common design aspect: They split recipes into
-two parts, ingredients and instructions. This is quite odd given the nature of
-cooking recipes. RxOL_, created in 1985, represents recipes as a graph with
-postfix notation and minimal “chitchat”. Although Pesto is not a direct
-descendant of RxOL it’s syntax and semantics are quite similar.
+YumML_ is an approach similar to those listed above, but based on YAML instead
+of XML. The specification has been removed from the web and is available
+through the Web Archive only.
+
+`Cordon Bleu`_ (1999) encodes recipes as programs for a cooking machine and
+defines a Pascal-like language. Being so close to real programming languages
+Cordon Bleu is barely useable by anyone except programmers. Additionally the
+language is poorly-designed, since its syntax is inconsistent and the user is
+limited to a set of predefined operations.
+
+Finally there is RxOL_, created in 1985. It constructs a graph from recipes
+written down with a few operators and postfix notation. It does not separate
+ingredients and cooking instructions like every other syntax introduced before.
+Although Pesto is not a direct descendant of RxOL both share many ideas.
 
 .. _REML: http://reml.sourceforge.net/
+.. _eatdrinkfeelgood: https://web.archive.org/web/20070109085643/http://eatdrinkfeelgood.org/1.1/
 .. _RecipeML: http://www.formatdata.com/recipeml/index.html
 .. _CookML: http://www.kalorio.de/index.php?Mod=Ac&Cap=CE&SCa=../cml/CookML_EN
-.. _Mealmaster: http://www.wedesoft.de/anymeal-api/mealmaster.html
+.. _Meal-Master: http://episoft.home.comcast.net/~episoft/
+.. _ABNF grammar: http://www.wedesoft.de/anymeal-api/mealmaster.html
+.. _MasterCook: http://mastercook.com/
 .. _MXP: http://www.oocities.org/heartland/woods/2073/Appendix.htm
 .. _RecipeBook XML: http://web.archive.org/web/20141101132332/http://www.happy-monkey.net/recipebook/
 .. _YumML: http://web.archive.org/web/20140703234140/http://vikingco.de/yumml.html
@@ -112,6 +157,7 @@ descendant of RxOL it’s syntax and semantics are quite similar.
 .. _RxOL: http://www.dodomagnifico.com/641/Recipes/CompCook.html
 .. _Gourmet: http://thinkle.github.io/gourmet/
 .. _KRecipes: http://krecipes.sourceforge.net/
+.. _Cordon Bleu: http://www.inf.unideb.hu/~bognar/ps_ek/cb_lang.ps
 
 .. There is a copy at http://diyhpl.us/~bryan/papers2/CompCook.html as well
 
