@@ -20,7 +20,7 @@ Language semantics
 >
 > import Codec.Pesto.Parse hiding (test)
 
-The parser’s output, a stream of operations, may contain multiple recipes. A
+The parser’s output, a stream of instructions, may contain multiple recipes. A
 recipe must start with the directive “pesto” and may end with “bonappetit”.
 This function extracts all recipes from the stream and removes both directives.
 
@@ -34,7 +34,7 @@ This function extracts all recipes from the stream and removes both directives.
 > 		(between, next) = break isEnd stream
 > extract (x:xs) = extract xs
 
-Start and end directive are removed from the extracted operations.  The
+Start and end directive are removed from the extracted instructions.  The
 directive “bonappetit” is optional at the end of a stream.
 
 > testExtract = [
@@ -43,7 +43,7 @@ directive “bonappetit” is optional at the end of a stream.
 > 	, extract [Directive "pesto"] ~?= [[]]
 > 	, extract [Directive "pesto", Directive "foobar"] ~?= [[Directive "foobar"]]
 
-Operations surrounding the start and end directive are removed.
+Instructions surrounding the start and end directive are removed.
 
 > 	, extract [Unknown "Something", Directive "pesto"] ~?= [[]]
 > 	, extract [Unknown "Something", Action "pour", Directive "pesto"] ~?= [[]]
@@ -57,12 +57,12 @@ previous recipe and starts a new one.
 > 	, extract [Directive "pesto", Annotation "foobar", Directive "pesto", Directive "bonappetit"] ~?= [[Annotation "foobar"], []]
 > 	]
 
-Each recipe’s stream of operations drives a stack-based machine that transforms
+Each recipe’s stream of instructions drives a stack-based machine that transforms
 it into a directed graph. Think of the stack as your kitchen’s workspace that
 is used to prepare the food’s components. You can add new ingredients, perform
 actions on them, put them aside and add them again.
 
-This function processes a list of nodes, that is operations uniquely identified
+This function processes a list of nodes, that is instructions uniquely identified
 by an integer and returns the edges of the directed graph as a list of tuples.
 
 > toGraph nodes = edges
@@ -105,14 +105,14 @@ workspace labeled with Result or Alternative. More on that `in the next section
 
 > 		f ctx (i, Reference _) = addToStack ctx i
 
-Annotations add a description to any of the previous operations. They can be
+Annotations add a description to any of the previous instructions. They can be
 used to provide more information about ingredients (so “hot water” becomes
 “+water (hot)”, tools (“&oven (200 °C)”) or actions (“[cook] (XXX)”).
 
 > 		f ctx@(Nothing, s, edges) (_, Annotation _) = ctx
 > 		f (Just prev, s, edges) (i, Annotation _) = (Just prev, s, (i, prev):edges)
 
-Unused directives or unknown operations are danging nodes with no connection to
+Unused directives or unknown instructions are danging nodes with no connection to
 other nodes.
 
 > 		f ctx (_, Directive _) = ctx
@@ -146,7 +146,7 @@ But Action, Alternative and Result do in combination with them:
 > 	, cmpGraph "&foobar [barbaz] [C] >D" [(0, 1), (1, 2), (2, 3)]
 
 If the stack is empty, i.e. it was cleared by a Result or Alternative
-operation, consecutive results or alternatives operate on the *previous*,
+instruction, consecutive results or alternatives operate on the *previous*,
 non-empty stack.
 
 > 	, cmpGraph "+foobar >barbaz >C" [(0, 1), (0, 2)]
@@ -160,7 +160,7 @@ Unless that stack too is empty. Then they do nothing:
 > 	, cmpGraph "(foobar) (foobar)" []
 > 	, cmpGraph "[foobar]" []
 
-The Annotation operation always creates an edge to the most-recently processed
+The Annotation instruction always creates an edge to the most-recently processed
 node that was not an annotation. Thus two consecutive annotations create edges
 to the same node.
 
@@ -171,7 +171,7 @@ to the same node.
 > 	, cmpGraph "+foobar |barbaz (C)" [(0, 1), (2, 1)]
 > 	, cmpGraph "*foobar (C)" [(1, 0)]
 
-Unknown directives or operations are never connected to other nodes.
+Unknown directives or instructions are never connected to other nodes.
 
 > 	, cmpGraph "%invalid" []
 > 	, cmpGraph "invalid" []
@@ -180,7 +180,7 @@ Unknown directives or operations are never connected to other nodes.
 References
 ++++++++++
 
-Results and alternatives can be referenced with the Reference operation.
+Results and alternatives can be referenced with the Reference instruction.
 Resolving these references does not happen while buiding the graph, but
 afterwards. This allows referencing an a result or alternative before its
 definition with regard to the their processing order.
@@ -203,7 +203,7 @@ to the reference in question is created.
 > 		isTarget _ _ = False
 
 
-References works before or after the result operation.
+References works before or after the result instruction.
 
 > testRef = [
 > 	  cmpGraphRef ">foobar *foobar" [(0, 1)]

@@ -6,7 +6,7 @@ Language syntax
 > module Codec.Pesto.Parse (
 > 	  parse
 > 	, test
-> 	, Operation(..)
+> 	, Instruction(..)
 > 	, Quantity(..)
 > 	, Unit(..)
 > 	, Object(..)
@@ -34,23 +34,20 @@ Language syntax
 >
 > import Codec.Pesto.Serialize (serialize)
 
-Pesto parses UTF-8_ encoded input files into a sequence of operations.
-
-- stream of operations
-- utf8 encoded
-Every
-character within the Unicode whitespace class is considered a space.
+Pesto parses UTF-8_ encoded input data consisting of space-delimited
+instructions.  Every character within the Unicode whitespace class is
+considered a space.
 
 .. _UTF-8: https://tools.ietf.org/html/rfc3629
 .. _spaces1:
 
-> stream = ((,) <$> getPosition <*> operation) `sepEndBy` spaces1
+> stream = ((,) <$> getPosition <*> instruction) `sepEndBy` spaces1
 > 	<?> "stream"
 > spaces1 = many1 space
 
-The following operations are supported:
+The following instructions are supported:
 
-> data Operation =
+> data Instruction =
 > 	  Annotation String
 > 	| Ingredient Quantity
 > 	| Tool Quantity
@@ -62,7 +59,7 @@ The following operations are supported:
 > 	| Unknown String
 > 	deriving (Show, Eq)
 >
-> operation =
+> instruction =
 > 	    try annotation
 > 	<|> try ingredient
 > 	<|> try tool
@@ -72,28 +69,27 @@ The following operations are supported:
 > 	<|> try reference
 > 	<|> try directive
 > 	<|> try unknown
-> 	<?> "operation"
+> 	<?> "instruction"
 
-The pesto grammar has two kinds of operations: The first one begins with a
-start character and consumes characters up to and including a terminating
-symbol (``end``), which can be escaped with a backslash (``\``):
+The pesto grammar has two instruction types: The first one begins with a
+start symbol (``start``) and consumes any character up to and including a
+terminating symbol (``end``), which can be escaped with a backslash (``\``).
 
 > betweenEscaped start end =
 > 	   char start
 > 	*> many (try (char '\\' *> char end) <|> satisfy (/= end))
 > 	<* char end
 
-Annotations and Actions both are of this kind:
+Annotations and actions both are of this kind:
 
 > annotation = Annotation <$> betweenEscaped '(' ')'
 > action = Action <$> betweenEscaped '[' ']'
 
 Here are examples for both:
 
-> testOpterm = [cmpOperation "(skinless\nboneless)" (Right (Annotation "skinless\nboneless"))
-> 	, cmpOperation "[stir together]" (Right (Action "stir together"))
-> 	, cmpOperation "[stir\\]together]" (Right (Action "stir]together"))]
-
+> testOpterm = [cmpInstruction "(skinless\nboneless)" (Right (Annotation "skinless\nboneless"))
+> 	, cmpInstruction "[stir together]" (Right (Action "stir together"))
+> 	, cmpInstruction "[stir\\]together]" (Right (Action "stir]together"))]
 
 The second one starts with one identifying character, ignores the following
 whitespace characters and then consumes an object or a quantity.
@@ -105,28 +101,34 @@ whitespace characters and then consumes an object or a quantity.
 > alternative = oparg '|' (Alternative <$> object)
 > reference = oparg '*' (Reference <$> quantity)
 
-Additionally there are two special operations. Directives are similar to the
-previous operations, but consume a qstr.
+Additionally there are two special instructions. Directives are similar to the
+previous instructions, but consume a qstr.
 
 > directive = oparg '%' (Directive <$> qstr)
 
-Unknown operations are the fallthrough-case and accept anything. They must not
-be discarded at this point. The point of accepting anything is to fail as late
-as possible while processing Pesto documents. This gives us a chance to print
-helpful mesages that provide additional aid to the user who can then fix the
-problem.
+Unknown instructions are the fallthrough-case and accept anything. They must
+not be discarded at this point. The point of accepting anything is to fail as
+late as possible while processing input. This gives the parser a chance to
+print helpful mesages that provide additional aid to the user who can then fix
+the problem.
 
 > unknown = Unknown <$> many1 notspace
 
-> testOparg = [
-> 	  cmpOperation "+100 g flour" (Right (Ingredient (Quantity (Exact (AmountRatio (100%1))) "g" "flour")))
+Below are examples for these instructions:
 
-> 	, cmpOperation "&oven" (Right (Tool (Quantity (Exact (AmountStr "")) "" "oven")))
-> 	, cmpOperation ">dough" (Right (Result "dough"))
-> 	, cmpOperation "|trimmings" (Right (Alternative "trimmings"))
-> 	, cmpOperation "*fish" (Right (Reference (Quantity (Exact (AmountStr "")) "" "fish")))
-> 	, cmpOperation3 "% invalid" (Right (Directive "invalid")) "%invalid"
-> 	, cmpOperation3 "* \t\n 1 _ cheese" (Right (Reference (Quantity (Exact (AmountRatio (1%1))) "" "cheese"))) "*1 _ cheese"
+> testOparg = [
+> 	  cmpInstruction "+100 g flour"
+> 	      (Right (Ingredient (Quantity (Exact (AmountRatio (100%1))) "g" "flour")))
+> 	, cmpInstruction "&oven"
+> 	      (Right (Tool (Quantity (Exact (AmountStr "")) "" "oven")))
+> 	, cmpInstruction ">dough" (Right (Result "dough"))
+> 	, cmpInstruction "|trimmings" (Right (Alternative "trimmings"))
+> 	, cmpInstruction "*fish"
+> 	      (Right (Reference (Quantity (Exact (AmountStr "")) "" "fish")))
+> 	, cmpInstruction3 "% invalid" (Right (Directive "invalid")) "%invalid"
+> 	, cmpInstruction3 "* \t\n 1 _ cheese"
+> 	      (Right (Reference (Quantity (Exact (AmountRatio (1%1))) "" "cheese")))
+> 	      "*1 _ cheese"
 > 	]
 
 Qstr
@@ -207,7 +209,7 @@ the usual escape codes like \\n, \\t, … will *not* be expanded.
 Quantity
 ++++++++
 
-The operations Ingredient, Tool and Reference accept a *quantity*, that is a
+The instructions Ingredient, Tool and Reference accept a *quantity*, that is a
 triple of Approximately, Unit and Object as parameter.
 
 > data Quantity = Quantity Approximately Unit Object deriving (Show, Eq)
@@ -363,8 +365,8 @@ Wrap qstr test in AmountStr to aid serialization test
 > cmpQuantity a b = cmpQuantity3 a b a
 > cmpQuantity3 = cmpParseSerialize quantity
 
-> cmpOperation a b = cmpOperation3 a b a
-> cmpOperation3 = cmpParseSerialize operation
+> cmpInstruction a b = cmpInstruction3 a b a
+> cmpInstruction3 = cmpParseSerialize instruction
 
 > exactQuantity a b c = Right (Quantity (Exact a) b c)
 

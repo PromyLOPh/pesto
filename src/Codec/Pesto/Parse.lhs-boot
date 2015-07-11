@@ -1,6 +1,6 @@
 > module Codec.Pesto.Parse where
 
-> data Operation =
+> data Instruction =
 > 	  Annotation String
 > 	| Ingredient Quantity
 > 	| Tool Quantity

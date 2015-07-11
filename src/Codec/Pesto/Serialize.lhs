@@ -17,13 +17,12 @@ Serializing
 - Add instance for graph
 - use :math:`\mathcal{O}(1)` string builder
 
-
-Finally transform linear stream of operations into a string again:
+Finally transform linear stream of instructions into a string again:
 
 > instance Serializeable a => Serializeable [a] where
 > 	serialize ops = unlines $ map serialize ops
 
-> instance Serializeable Operation where
+> instance Serializeable Instruction where
 > 	serialize (Annotation s) = quote '(' ')' s
 > 	serialize (Ingredient q) = '+':serialize q
 > 	serialize (Tool q) = '&':serialize q

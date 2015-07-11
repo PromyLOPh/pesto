@@ -136,7 +136,7 @@ through the Web Archive only.
 defines a Pascal-like language. Being so close to real programming languages
 Cordon Bleu is barely useable by anyone except programmers. Additionally the
 language is poorly-designed, since its syntax is inconsistent and the user is
-limited to a set of predefined operations.
+limited to a set of predefined functions.
 
 Finally there is RxOL_, created in 1985. It constructs a graph from recipes
 written down with a few operators and postfix notation. It does not separate
