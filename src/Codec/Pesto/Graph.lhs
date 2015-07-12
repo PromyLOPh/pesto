@@ -6,8 +6,10 @@ Language semantics
 > module Codec.Pesto.Graph (
 > 	  toGraph
 > 	, walkRoot
-> 	, outgoing
-> 	, incoming
+> 	, outgoingEdges
+> 	, outgoingNodes
+> 	, incomingEdges
+> 	, incomingNodes
 > 	, firstNodeId
 > 	, resolveReferences
 > 	, test
@@ -247,9 +249,11 @@ Find graph’s root node(s), that is a node without outgoing edges:
 
 Get all nodes with edges pointing towards nodeid
 
-> incoming edges (nodeid, _) = filter ((==) nodeid . snd) edges
+> incomingEdges edges (nodeid, _) = filter ((==) nodeid . snd) edges
+> incomingNodes nodes edges n = map ((!!) nodes . fst) $ incomingEdges edges n
 
-> outgoing edges (nodeid, _) = filter ((==) nodeid . fst) edges
+> outgoingEdges edges (nodeid, _) = filter ((==) nodeid . fst) edges
+> outgoingNodes nodes edges n = map ((!!) nodes . snd) $ outgoingEdges edges n
 
 > test = ["graph" ~: testGraph, "ref" ~: testRef, "extract" ~: testExtract]
 

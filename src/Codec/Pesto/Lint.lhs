@@ -67,7 +67,7 @@ exist the key maps to a list of those values.
 
 > rootAnnotations nodes edges = foldl check [] rootIncoming
 > 	where
-> 		rootIncoming = map ((!!) nodes . fst) $ concatMap (incoming edges) $ walkRoot nodes edges
+> 		rootIncoming = concatMap (incomingNodes nodes edges) $ walkRoot nodes edges
 > 		check xs (i, Annotation s) | "." `isPrefixOf` s = case parseMetadata s of
 > 			(Left _) -> LintResult InvalidMetadata [i]:xs
 > 			(Right (k, v)) -> if isKeyKnown k
@@ -147,7 +147,7 @@ Only actions can be annotated with a time.
 
 > timeAnnotatesAction nodes edges = foldl f [] nodes
 > 	where
-> 		f xs n@(nodeid, Tool q) | isTime q && (not . allActions) (outgoing edges n) = LintResult TimeAnnotatesAction [nodeid]:xs
+> 		f xs n@(nodeid, Tool q) | isTime q && (not . allActions) (outgoingEdges edges n) = LintResult TimeAnnotatesAction [nodeid]:xs
 > 		f xs _ = xs
 > 		toNodelist = (!!) nodes . snd
 > 		allActions = all (isAction . snd . toNodelist)
@@ -230,7 +230,7 @@ all results and alternatives are referenced at some point.
 
 > referencesResolved nodes edges = foldl f [] nodes
 > 	where
-> 		f xs n@(nodeid, Reference _) | null (incoming edges n) =
+> 		f xs n@(nodeid, Reference _) | null (incomingEdges edges n) =
 > 				LintResult UndefinedReference [nodeid]:xs
 >		f xs _ = xs
 
@@ -244,7 +244,7 @@ only occur at the beginning of a recipe.
 
 > resultNonempty nodes edges = foldl f [] nodes
 > 	where
-> 		f xs n@(nodeid, Result _) | null (incoming edges n) =
+> 		f xs n@(nodeid, Result _) | null (incomingEdges edges n) =
 > 				LintResult TooFewChildren [nodeid]:xs
 >		f xs _ = xs
 
@@ -259,7 +259,7 @@ make the alternative pointless.
 
 > twoAlternatives nodes edges = foldl f [] nodes
 > 	where
->		f xs n@(nodeid, Alternative _) | length (incoming edges n) < 2 =
+>		f xs n@(nodeid, Alternative _) | length (incomingEdges edges n) < 2 =
 > 				LintResult TooFewChildren [nodeid]:xs
 >		f xs _ = xs
 
