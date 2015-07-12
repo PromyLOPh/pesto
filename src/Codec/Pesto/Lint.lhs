@@ -13,15 +13,15 @@ Linting
 > import Codec.Pesto.Graph hiding (test)
 > import Codec.Pesto.Parse hiding (test)
 
-Not every graph generated in the previous section is a useful recipe, since
-some combinations of instructions just do not make sense. The linting test in
-this section can detect common errors. Failing any of these tests does not
-render a recipe invalid, but *useless*. Thus implementations must not create
-such recipes. They may be accepted the user though.
+Not every graph generated in the previous section is a useful recipe. Some
+instruction sequences just do not make sense. The tests in this section can
+detect those. Failing any of them does not render a stream of instructions or
+graph invalid. They just does not describe a *useful* recipe. Thus
+implementations must not generate or export such documents. However they should
+accept input that fails any of the tests and warn the user about the failure.
 
-Every lint test checks a single aspect of the graph.
-
-> lint nodes edges = concatMap (\f -> f nodes edges) lintTests
+Additionally this section provides guidance on how to use the instructions
+provided by the Pesto language properly.
 
 Metadata
 ++++++++
@@ -323,6 +323,10 @@ Appendix
 > 	| InvalidNode
 > 	| RangeFromLargerThanTo
 > 	deriving (Show, Eq, Ord)
+
+Every lint test checks a single aspect of the graph.
+
+> lint nodes edges = concatMap (\f -> f nodes edges) lintTests
 
 > lintTests = [
 > 	  rootIsResult
