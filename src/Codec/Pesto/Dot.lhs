@@ -15,7 +15,6 @@ image, for example.
 >		f (a, b) = show a ++ " -> " ++ show b ++ ";"
 > 		e = map f edges
 > 		n = map (\(a, b) -> show a ++ " [label=\"" ++ dotEncodeString (serialize b) ++ "\"];") nodes
->		addcolor = "#e6ee9c"
 
 > dotEncodeString = concatMap dotEncodeChar
 > dotEncodeChar '\n' = "\\n"

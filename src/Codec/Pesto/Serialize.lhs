@@ -4,7 +4,7 @@ Serializing
 .. class:: nodoc
 
 > module Codec.Pesto.Serialize (serialize) where
-> import Data.Char (isSpace, toLower, isLetter)
+> import Data.Char (isSpace, isLetter)
 > import Data.Ratio (numerator, denominator)
 >
 > import {-# SOURCE #-} Codec.Pesto.Parse

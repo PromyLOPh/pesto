@@ -6,11 +6,9 @@ Linting
 > module Codec.Pesto.Lint (lint, test, parseMetadata, extractMetadata) where
 > import Test.HUnit hiding (test, Node)
 > import Data.List (sort, isPrefixOf)
-> import Control.Applicative ((<*>), (<$>), (<*), (*>))
+> import Control.Applicative ((<*>), (<$>), (*>))
 > import Control.Monad (liftM)
 > import Text.Parsec hiding (parse)
-> import Text.Parsec.Char
-> import Data.Maybe (mapMaybe)
 > import Data.Char (isSpace)
 >
 > import Codec.Pesto.Graph hiding (test)
@@ -40,7 +38,7 @@ dangling.
 
 > rootIsResult nodes edges = case walkRoot nodes edges of
 > 	[] -> [LintResult NoRootNode []]
-> 	(i, Result _):[] -> []
+> 	(_, Result _):[] -> []
 > 	(i, _):[] -> [LintResult NonResultRootNode [i]]
 > 	xs -> [LintResult MoreThanOneRootNode (map fst xs)]
 
@@ -182,9 +180,9 @@ By definition time is a tool and not an ingredient.
 > isTime (Quantity _ unit "") | unit `elem` timeUnits = True
 > isTime _ = False
 
-> timeIsATool nodes edges = foldl f [] nodes
+> timeIsATool nodes _ = foldl f [] nodes
 > 	where
-> 		f xs n@(nodeid, Ingredient q) | isTime q = LintResult TimeIsATool [nodeid]:xs
+> 		f xs (nodeid, Ingredient q) | isTime q = LintResult TimeIsATool [nodeid]:xs
 >		f xs _ = xs
 
 > testLintQuantity = [
@@ -225,11 +223,11 @@ may be used with each of them: m (milli-), c (centi-), d (dezi-) and k (kilo
 Additionally time in s (second), min (minute), h (hour), d (day) should be
 accepted.
 
-> wellKnownUnit nodes edges = foldl f [] nodes
+> wellKnownUnit nodes _ = foldl f [] nodes
 > 	where
-> 		f xs n@(nodeid, Ingredient q) | (not . known) q =
+> 		f xs (nodeid, Ingredient q) | (not . known) q =
 > 				LintResult UnitNotWellKnown [nodeid]:xs
-> 		f xs n@(nodeid, Tool q) | (not . known) q =
+> 		f xs (nodeid, Tool q) | (not . known) q =
 > 				LintResult UnitNotWellKnown [nodeid]:xs
 >		f xs _ = xs
 > 		known (Quantity _ unit _) = unit `elem` knownUnits
@@ -339,11 +337,11 @@ Ranges
 The first amount of a range ratio must be strictly smaller than the second.
 This limitation is not enforced for ranges containing strings.
 
-> rangeFromLargerThanTo nodes edges = foldl f [] nodes
+> rangeFromLargerThanTo nodes _ = foldl f [] nodes
 > 	where
->		f xs n@(nodeid, Ingredient q) | not $ rangeOk q =
+>		f xs (nodeid, Ingredient q) | not $ rangeOk q =
 > 				LintResult RangeFromLargerThanTo [nodeid]:xs
->		f xs n@(nodeid, Reference q) | not $ rangeOk q =
+>		f xs (nodeid, Reference q) | not $ rangeOk q =
 > 				LintResult RangeFromLargerThanTo [nodeid]:xs
 >		f xs _ = xs
 > 		rangeOk (Quantity (Range (AmountRatio a) (AmountRatio b)) _ _) = a < b
@@ -360,7 +358,6 @@ This limitation is not enforced for ranges containing strings.
 Appendix
 ++++++++
 
-> type LintTest a = Nodes a -> Edges -> [LintResult]
 > data LintResult = LintResult LintStatus [NodeId] deriving (Show, Eq, Ord)
 > data LintStatus =
 > 	  NoRootNode
@@ -393,15 +390,15 @@ Every lint test checks a single aspect of the graph.
 > 	, rangeFromLargerThanTo
 > 	]
 
-> withGraph doc f = f doc nodes edges
+> withGraph doc f = f nodes edges
 >	where
 > 		(Right op) = (head . extract . snd . unzip) <$> parse ("%pesto " ++ doc)
 > 		nodes = zip [firstNodeId..] op
 > 		edges = toGraph nodes ++ resolveReferences nodes
 
-> cmpLint doc expect = withGraph doc (\doc nodes edges -> doc ~: sort (lint nodes edges) ~?= sort expect)
+> cmpLint doc expect = withGraph doc (\nodes edges -> doc ~: sort (lint nodes edges) ~?= sort expect)
 
-> cmpLintMeta doc expectLint expectMeta = withGraph doc (\doc nodes edges -> doc ~: [
+> cmpLintMeta doc expectLint expectMeta = withGraph doc (\nodes edges -> doc ~: [
 > 		  sort (lint nodes edges) ~?= sort expectLint
 > 		, liftM sort (extractMetadata nodes edges) ~?= liftM sort expectMeta
 > 		])

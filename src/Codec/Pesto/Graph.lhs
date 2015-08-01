@@ -20,7 +20,7 @@ Language semantics
 > 	, Edge
 > 	, Edges
 > 	) where
-> import Data.Char (isSpace, toLower, isLetter)
+> import Data.Char (toLower)
 > import Data.List (sort, nub)
 > import Test.HUnit hiding (test, Node)
 > import Control.Applicative ((<$>))
@@ -39,7 +39,7 @@ This function extracts all recipes from the stream and removes both directives.
 > 		isEnd (Directive x) | x `elem` ["bonappetit", "pesto"] = True
 > 		isEnd _ = False
 > 		(between, next) = break isEnd stream
-> extract (x:xs) = extract xs
+> extract (_:xs) = extract xs
 
 Start and end directive are removed from the extracted instructions.  The
 directive “bonappetit” is optional at the end of a stream.
@@ -72,9 +72,8 @@ actions on them, put them aside and add them again.
 This function processes a list of nodes, that is instructions uniquely identified
 by an integer and returns the edges of the directed graph as a list of tuples.
 
-> toGraph nodes = edges
+> toGraph nodes = third $ foldl f (Nothing, [[]], []) nodes
 > 	where
-> 		(_, _, edges) = foldl f (Nothing, [[]], []) nodes
 
 Ingredients are simply added to the current workspace. They should for example
 appear on the shopping list.
@@ -91,6 +90,7 @@ Actions take all ingredients and tools currently on the workspace, perform some
 action with them and put the product back onto the workspace.
 
 > 		f (_, stack:sx, edges) (i, Action _) = (Just i, [i]:stack:sx, edgesTo i stack ++ edges)
+> 		f (_, [], _) (_, Action _) = undefined -- never reached
 
 Results add a label to the current workspace’s contents and move them out of
 the way. It should be a meaningful name, not just A and B obviously.
@@ -116,7 +116,7 @@ Annotations add a description to any of the previous instructions. They can be
 used to provide more information about ingredients (so “hot water” becomes
 “+water (hot)”, tools (“&oven (200 °C)”) or actions (“[cook] (XXX)”).
 
-> 		f ctx@(Nothing, s, edges) (_, Annotation _) = ctx
+> 		f ctx@(Nothing, _, _) (_, Annotation _) = ctx
 > 		f (Just prev, s, edges) (i, Annotation _) = (Just prev, s, (i, prev):edges)
 
 Unused directives or unknown instructions are danging nodes with no connection to
@@ -128,6 +128,7 @@ other nodes.
 These are helper functions:
 
 > 		addToStack (_, stack:sx, edges) i = (Just i, (i:stack):sx, edges)
+> 		addToStack (_, [], _) _ = undefined -- never reached
 > 		consumeStack (_, s, edges) i =
 > 			let
 > 				stack = dropWhile null s
@@ -208,7 +209,7 @@ to the reference in question is created.
 > 		isTarget dest (_, Result x) = lc x == lc dest
 >		isTarget dest (_, Alternative x) = lc x == lc dest
 > 		isTarget _ _ = False
-
+> findTarget _ _ = []
 
 References works before or after the result instruction.
 
@@ -266,4 +267,6 @@ Get all nodes with edges pointing towards nodeid
 > outgoingNodes nodes edges n = map ((!!) nodes . snd) $ outgoingEdges edges n
 
 > test = ["graph" ~: testGraph, "ref" ~: testRef, "extract" ~: testExtract]
+
+> third (_, _, x) = x
 

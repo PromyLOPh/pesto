@@ -8,8 +8,8 @@ Language syntax
 > 	, test
 > 	, Instruction(..)
 > 	, Quantity(..)
-> 	, Unit(..)
-> 	, Object(..)
+> 	, Unit
+> 	, Object
 > 	, Approximately(..)
 > 	, Amount(..)
 > 	, isResult
@@ -23,13 +23,11 @@ Language syntax
 > 	, notspace
 > 	) where
 > import Control.Applicative ((<*>), (<$>), (<*), (*>))
-> import Data.Char (isSpace, toLower, isLetter)
+> import Data.Char (isSpace)
 > import Data.Ratio ((%))
 > import Text.Parsec hiding (parse)
-> import Text.Parsec.Char
 > import Text.ParserCombinators.Parsec.Pos (newPos)
-> import Text.ParserCombinators.Parsec.Error (ParseError, Message,
-> 		errorMessages, messageEq, newErrorUnknown)
+> import Text.ParserCombinators.Parsec.Error (newErrorUnknown)
 > import Test.HUnit hiding (test)
 >
 > import Codec.Pesto.Serialize (serialize)
