@@ -9,8 +9,8 @@ Running tests
 > import Codec.Pesto.Lint (test)
 > import Codec.Pesto.Graph (test)
 
-The testcases can be run with ``cabal run pesto-test``. This runs *all*
-testcases from all modules and prints a summary.
+The testcases can be run with ``cabal test``. This runs *all* testcases from
+all modules and prints a summary.
 
 > main = runTestTT tests >>= \c -> if errors c + failures c > 0 then exitFailure else exitSuccess
 

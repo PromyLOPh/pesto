@@ -12,9 +12,9 @@ Building documentation
 > import qualified Data.Set as S
 
 The HTML documentation is generated directly from the source code of
-Codec.Pesto. That module serves as starting point and it includes the other
-modules in a sensible order. Pandoc_ renders the restructuredText_ to HTML. We
-use a slightly modified template.
+Codec.Pesto by running ``cabal run pesto-doc``. That module serves as starting
+point and it includes the other modules in a sensible order. Pandoc_ renders
+the restructuredText_ to HTML. We use a slightly modified template.
 
 .. _pandoc: http://www.pandoc.org/
 .. _restructuredText: http://docutils.sourceforge.net/rst.html
