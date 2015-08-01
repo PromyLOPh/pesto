@@ -4,9 +4,10 @@ User interface
 .. class:: nodoc
 
 > module Main (main) where
+> import System.IO (hPrint, stderr)
 > import Codec.Pesto.Parse (parse)
 > import Codec.Pesto.Graph (extract, toGraph, firstNodeId, resolveReferences)
-> import Codec.Pesto.Lint (lint)
+> import Codec.Pesto.Lint (lint, extractMetadata)
 > import Codec.Pesto.Dot (toDot)
 
 The pesto to dot converter can be run with ``cabal run pesto``. It expects a
@@ -28,7 +29,8 @@ add linting information to graph
 > 			doc = (head . extract . snd . unzip) stream
 > 			nodes = zip [firstNodeId..] doc
 > 			edges = toGraph nodes ++ resolveReferences nodes
-> 		--print $ lint nodes edges
+> 		hPrint stderr $ extractMetadata nodes edges
+> 		hPrint stderr $ lint nodes edges
 > 		putStrLn $ toDot nodes edges
 
 > malformedRecipe = print

@@ -14,10 +14,15 @@ Language semantics
 > 	, resolveReferences
 > 	, test
 > 	, extract
+> 	, NodeId
+> 	, Node
+> 	, Nodes
+> 	, Edge
+> 	, Edges
 > 	) where
 > import Data.Char (isSpace, toLower, isLetter)
 > import Data.List (sort, nub)
-> import Test.HUnit hiding (test)
+> import Test.HUnit hiding (test, Node)
 > import Control.Applicative ((<$>))
 >
 > import Codec.Pesto.Parse hiding (test)
@@ -240,7 +245,12 @@ Appendix
 > cmpGraph = runGraphWith toGraph
 > cmpGraphRef = runGraphWith resolveReferences
 
-> firstNodeId = 0 :: Int
+> type NodeId = Int
+> type Node a = (NodeId, a)
+> type Nodes a = [Node a]
+> type Edge = (NodeId, NodeId)
+> type Edges = [Edge]
+> firstNodeId = 0 :: NodeId
 
 Find graph’s root node(s), that is a node without outgoing edges:
 

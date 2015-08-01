@@ -3,12 +3,15 @@ Linting
 
 .. class:: nodoc
 
-> module Codec.Pesto.Lint (lint, test, parseMetadata) where
-> import Test.HUnit hiding (test)
+> module Codec.Pesto.Lint (lint, test, parseMetadata, extractMetadata) where
+> import Test.HUnit hiding (test, Node)
 > import Data.List (sort, isPrefixOf)
 > import Control.Applicative ((<*>), (<$>), (<*), (*>))
+> import Control.Monad (liftM)
 > import Text.Parsec hiding (parse)
 > import Text.Parsec.Char
+> import Data.Maybe (mapMaybe)
+> import Data.Char (isSpace)
 >
 > import Codec.Pesto.Graph hiding (test)
 > import Codec.Pesto.Parse hiding (test)
@@ -23,29 +26,32 @@ accept input that fails any of the tests and warn the user about the failure.
 Additionally this section provides guidance on how to use the instructions
 provided by the Pesto language properly.
 
-Metadata
-++++++++
+Graph properties
+++++++++++++++++
 
-.. _recipetitle:
-.. _resultsused:
+- weakly connected, no dangling nodes/subgraphs
+- acyclic
 
 The graph must have exactly one root node (i.e. a node with incoming edges
-only) and it must be a result. The result’s object name is the recipe’s title.
-This also requires all results and alternatives to be referenced somewhere.
-Directives are either consumed when parsing, generating a graph and linting.
-Otherwise they are dangling as well. Unknown instructions are always dangling.
+only).  This also requires all results and alternatives to be referenced
+somewhere. Directives are either consumed when parsing, generating a graph and
+linting. Otherwise they are dangling as well. Unknown instructions are always
+dangling.
 
 > rootIsResult nodes edges = case walkRoot nodes edges of
 > 	[] -> [LintResult NoRootNode []]
-> 	(i, x):[] -> if isResult x then [] else [LintResult NonResultRootNode [i]]
+> 	(i, Result _):[] -> []
+> 	(i, _):[] -> [LintResult NonResultRootNode [i]]
 > 	xs -> [LintResult MoreThanOneRootNode (map fst xs)]
 
 Empty recipes or circular references have no root node:
 
-> testLintMetadata = [
-> 	  cmpLint "" [LintResult NoRootNode []]
-> 	, cmpLint "*foobar >foobar" [LintResult NoRootNode []]
-> 	, cmpLint "+foobar" [LintResult NonResultRootNode [0]]
+> testConnectivity = [
+> 	  cmpLint "" [LintResult NoRootNode [], LintResult NoMetadata []]
+> 	, cmpLint "*foobar >foobar"
+>		[LintResult NoRootNode [], LintResult NoMetadata []]
+> 	, cmpLint "+foobar"
+>		[LintResult NonResultRootNode [0], LintResult NoMetadata []]
 
 This recipe’s title is “Pesto”.
 
@@ -53,34 +59,56 @@ This recipe’s title is “Pesto”.
 
 Directives and unknown instructions are dangling and thus root nodes.
 
-> 	, cmpLint "invalid %invalid +foo >bar" [LintResult MoreThanOneRootNode [0,1,3]]
+> 	, cmpLint "invalid %invalid +foo >bar"
+> 		[LintResult MoreThanOneRootNode [0,1,3], LintResult NoMetadata []]
 >	]
 
-Additional key-value metadata for the whole recipe can be provided by adding
-annotations to the the root node. If multiple annotations with the same key
-exist the key maps to a list of those values.
+Metadata
+++++++++
 
-> parseMetadata = runParser metadata () ""
-> metadata = (,)
-> 	<$> (char '.' *> many1 (noneOf ":"))
-> 	<*> (char ':' *> spaces1 *> many1 anyChar)
-
-> rootAnnotations nodes edges = foldl check [] rootIncoming
-> 	where
-> 		rootIncoming = concatMap (incomingNodes nodes edges) $ walkRoot nodes edges
-> 		check xs (i, Annotation s) | "." `isPrefixOf` s = case parseMetadata s of
-> 			(Left _) -> LintResult InvalidMetadata [i]:xs
-> 			(Right (k, v)) -> if isKeyKnown k
-> 				then xs
-> 				else LintResult UnknownMetadataKey [i]:xs
-> 		check xs _ = xs
+.. _resultsused:
 
 .. class:: todo
 
-reject metadata annotations for non-root nodes
+root node can be alternative too?
 
-The valid keys are listed below. Additionally applications may add their own
-metadata with “x-appname-keyname”.
+The graph’s root node must be a result and its object value is used as recipe
+title.
+
+> extractMetadata nodes edges = case walkRoot nodes edges of
+> 		[n@(i, Result title)] ->
+> 			Just $ (i, ("title", title)):foldl f [] (incomingNodes nodes edges n)
+>		_ -> Nothing
+> 	where
+
+Additional key-value metadata for the whole recipe can be added as annotations
+to the root node. If multiple annotations with the same key exist the key maps
+to a list of those values. Annotations that are unparseable key-value pairs are
+added as recipe description instead.
+
+> 		f xs (i, Annotation s) = case parseMetadata s of
+> 				Left _ -> (i, ("description", s)):xs
+> 				Right kv -> (i, kv):xs
+> 		f xs _ = xs
+
+Key and value are separated by a colon. Keys must not contain whitespace or the
+colon char. A value may be empty.
+
+> parseMetadata = runParser metadata () ""
+> metadata = let keychars = satisfy (\x -> not (isSpace x) && x /= ':') in (,)
+> 	<$> many1 keychars
+> 	<*> (char ':' *> spaces *> many anyChar)
+
+> lintMetadata nodes edges = case extractMetadata nodes edges of
+> 		Just result -> foldl checkKey [] result
+> 		Nothing -> [LintResult NoMetadata []]
+> 	where
+> 		checkKey xs (_, (k, _)) | isKeyKnown k = xs
+> 		checkKey xs (i, _) = LintResult UnknownMetadataKey [i]:xs
+
+Valid metadata keys are listed below. Additionally applications may add keys by
+prefixing them with “x-myapp-”, thus an application called “basil” adding
+“some-key” would use the full key “x-basil-some-key”.
 
 > 		isKeyKnown k = k `elem` knownKeys || "x-" `isPrefixOf` k
 
@@ -88,9 +116,16 @@ The following metadata keys are permitted:
 
 > 		knownKeys = [
 
-The recipe’s language, as 2 character code (ISO 639-1:2002).
+Both, title and description, are implicit.
 
-> 			  "language"
+>			  "title"
+> 			, "description"
+
+The recipe’s language, as 2 character code (`ISO 639-1`_).
+
+.. _ISO 639-1: http://www.loc.gov/standards/iso639-2/php/English_list.php
+
+> 			, "language"
 
 Yield and time both must be a quantity.
 
@@ -103,19 +138,36 @@ An image can be a relative file reference or URI
 > 			, "author"
 > 			]
 
+.. class:: todo
+
+Check the metadata’s value format. I.e. yield/time must be quantity
+
 For instance a german language recipe for one person would look like this:
 
-> testRootAnnotations = [
-> 	  cmpLint "+foo >foobar (.language: de) (.yield: 1 _ Person) (.x-app-this: value)" []
+> testMetadata = [
+> 	  cmpLintMeta "+foo >foobar (language: de) (yield: 1 _ Person) (x-app-key: value)"
+>		[]
+>		(Just [(1, ("title", "foobar"))
+>			, (2, ("language", "de"))
+> 			, (3, ("yield", "1 _ Person"))
+> 			, (4, ("x-app-key", "value"))])
 
 Unparseable annotations or unknown keys are linting errors:
 
-> 	, cmpLint "+foo >foobar (.invalid)" [LintResult InvalidMetadata [2]]
-> 	, cmpLint "+foo >foobar (.unknown: value)" [LintResult UnknownMetadataKey [2]]
+> 	, cmpLintMeta "+foo >foobar (unknown-key: value)"
+> 		[LintResult UnknownMetadataKey [2]]
+> 		(Just [(1, ("title", "foobar"))
+> 			, (2, ("unknown-key", "value"))])
 
-Root node annotations not starting with a dot are considered recipe descriptions.
+Root node annotations not containing a parseable key-value pair are assigned
+the key “description”.
 
-> 	, cmpLint "+foo >foobar (some description)" []
+> 	, cmpLintMeta "+foo >foobar ( some description ) (another one: with colon) (another:     valid key-value)"
+> 		[LintResult UnknownMetadataKey [4]]
+> 		(Just [(1, ("title", "foobar"))
+> 			, (2, ("description", " some description "))
+> 			, (3, ("description", "another one: with colon"))
+> 			, (4, ("another", "valid key-value"))])
 > 	]
 
 .. _time-is-a-tool:
@@ -308,7 +360,8 @@ This limitation is not enforced for ranges containing strings.
 Appendix
 ++++++++
 
-> data LintResult a = LintResult LintStatus [a] deriving (Show, Eq, Ord)
+> type LintTest a = Nodes a -> Edges -> [LintResult]
+> data LintResult = LintResult LintStatus [NodeId] deriving (Show, Eq, Ord)
 > data LintStatus =
 > 	  NoRootNode
 > 	| NonResultRootNode
@@ -318,10 +371,10 @@ Appendix
 >	| TimeIsATool
 > 	| TimeAnnotatesAction
 >	| UnitNotWellKnown
-> 	| UnknownMetadataKey
-> 	| InvalidMetadata
 > 	| InvalidNode
 > 	| RangeFromLargerThanTo
+> 	| NoMetadata
+> 	| UnknownMetadataKey
 > 	deriving (Show, Eq, Ord)
 
 Every lint test checks a single aspect of the graph.
@@ -336,19 +389,26 @@ Every lint test checks a single aspect of the graph.
 > 	, timeIsATool
 > 	, timeAnnotatesAction
 > 	, wellKnownUnit
-> 	, rootAnnotations
+> 	, lintMetadata
 > 	, rangeFromLargerThanTo
 > 	]
 
-> cmpLint doc expect = doc ~: sort (lint nodes edges) ~?= sort expect
-> 	where
+> withGraph doc f = f doc nodes edges
+>	where
 > 		(Right op) = (head . extract . snd . unzip) <$> parse ("%pesto " ++ doc)
 > 		nodes = zip [firstNodeId..] op
 > 		edges = toGraph nodes ++ resolveReferences nodes
 
+> cmpLint doc expect = withGraph doc (\doc nodes edges -> doc ~: sort (lint nodes edges) ~?= sort expect)
+
+> cmpLintMeta doc expectLint expectMeta = withGraph doc (\doc nodes edges -> doc ~: [
+> 		  sort (lint nodes edges) ~?= sort expectLint
+> 		, liftM sort (extractMetadata nodes edges) ~?= liftM sort expectMeta
+> 		])
+
 > test = [
-> 	  testLintMetadata
-> 	, testRootAnnotations
+> 	  testConnectivity
+> 	, testMetadata
 > 	, testLintRefs
 > 	, testLintQuantity
 > 	, testLintWellKnownUnit
