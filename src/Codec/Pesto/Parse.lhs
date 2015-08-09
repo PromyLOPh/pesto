@@ -51,8 +51,8 @@ The following instructions are supported:
 > 	| Tool Quantity
 > 	| Action String
 > 	| Reference Quantity
-> 	| Result Object
-> 	| Alternative Object
+> 	| Result Quantity
+> 	| Alternative Quantity
 > 	| Directive String
 > 	| Unknown String
 > 	deriving (Show, Eq)
@@ -95,8 +95,8 @@ whitespace characters and then consumes an object or a quantity.
 > oparg ident cont = char ident *> spaces *> cont
 > ingredient = oparg '+' (Ingredient <$> quantity)
 > tool = oparg '&' (Tool <$> quantity)
-> result = oparg '>' (Result <$> object)
-> alternative = oparg '|' (Alternative <$> object)
+> result = oparg '>' (Result <$> quantity)
+> alternative = oparg '|' (Alternative <$> quantity)
 > reference = oparg '*' (Reference <$> quantity)
 
 Additionally there are two special instructions. Directives are similar to the
@@ -118,11 +118,11 @@ Below are examples for these instructions:
 > 	  cmpInstruction "+100 g flour"
 > 	      (Right (Ingredient (Quantity (Exact (AmountRatio (100%1))) "g" "flour")))
 > 	, cmpInstruction "&oven"
-> 	      (Right (Tool (Quantity (Exact (AmountStr "")) "" "oven")))
-> 	, cmpInstruction ">dough" (Right (Result "dough"))
-> 	, cmpInstruction "|trimmings" (Right (Alternative "trimmings"))
+> 	      (Right (Tool (strQuantity "oven")))
+> 	, cmpInstruction ">dough" (Right (Result (strQuantity "dough")))
+> 	, cmpInstruction "|trimmings" (Right (Alternative (strQuantity "trimmings")))
 > 	, cmpInstruction "*fish"
-> 	      (Right (Reference (Quantity (Exact (AmountStr "")) "" "fish")))
+> 	      (Right (Reference (strQuantity "fish")))
 > 	, cmpInstruction3 "% invalid" (Right (Directive "invalid")) "%invalid"
 > 	, cmpInstruction3 "* \t\n 1 _ cheese"
 > 	      (Right (Reference (Quantity (Exact (AmountRatio (1%1))) "" "cheese")))
@@ -367,6 +367,7 @@ Wrap qstr test in AmountStr to aid serialization test
 > cmpInstruction3 = cmpParseSerialize instruction
 
 > exactQuantity a b c = Right (Quantity (Exact a) b c)
+> strQuantity = Quantity (Exact (AmountStr "")) ""
 
 > test = [
 > 	  "quantity" ~: testQuantityOverloaded ++ testQuantityApprox ++ testQuantityAmount ++ testQuantityRatio

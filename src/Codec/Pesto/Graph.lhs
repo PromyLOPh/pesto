@@ -206,8 +206,8 @@ to the reference in question is created.
 > findTarget nodes (Reference (Quantity _ _ a)) = map fst $ filter (isTarget a) nodes
 > 	where
 > 		lc = map toLower
-> 		isTarget dest (_, Result x) = lc x == lc dest
->		isTarget dest (_, Alternative x) = lc x == lc dest
+> 		isTarget dest (_, Result (Quantity _ _ x)) = lc x == lc dest
+>		isTarget dest (_, Alternative (Quantity _ _ x)) = lc x == lc dest
 > 		isTarget _ _ = False
 > findTarget _ _ = []
 

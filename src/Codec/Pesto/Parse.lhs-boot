@@ -6,8 +6,8 @@
 > 	| Tool Quantity
 > 	| Action String
 > 	| Reference Quantity
-> 	| Result Object
-> 	| Alternative Object
+> 	| Result Quantity
+> 	| Alternative Quantity
 > 	| Directive String
 > 	| Unknown String
 > data Quantity = Quantity Approximately Unit Object

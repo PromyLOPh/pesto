@@ -28,8 +28,8 @@ Finally transform linear stream of instructions into a string again:
 > 	serialize (Tool q) = '&':serialize q
 > 	serialize (Action s) = quote '[' ']' s
 > 	serialize (Reference q) = '*':serialize q
-> 	serialize (Result s) = '>':serializeQstr s
-> 	serialize (Alternative s) = '|':serializeQstr s
+> 	serialize (Result q) = '>':serialize q
+> 	serialize (Alternative q) = '|':serialize q
 > 	serialize (Directive s) = '%':serializeQstr s
 > 	serialize (Unknown s) = s
 

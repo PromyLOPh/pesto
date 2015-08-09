@@ -7,9 +7,9 @@ Linting
 > import Test.HUnit hiding (test, Node)
 > import Data.List (sort, isPrefixOf)
 > import Control.Applicative ((<*>), (<$>), (*>))
-> import Control.Monad (liftM)
 > import Text.Parsec hiding (parse)
 > import Data.Char (isSpace)
+> import Data.Ratio ((%))
 >
 > import Codec.Pesto.Graph hiding (test)
 > import Codec.Pesto.Parse hiding (test)
@@ -51,10 +51,6 @@ Empty recipes or circular references have no root node:
 > 	, cmpLint "+foobar"
 >		[LintResult NonResultRootNode [0], LintResult NoMetadata []]
 
-This recipe’s title is “Pesto”.
-
-> 	, cmpLint "+foobar >Pesto" []
-
 Directives and unknown instructions are dangling and thus root nodes.
 
 > 	, cmpLint "invalid %invalid +foo >bar"
@@ -70,12 +66,14 @@ Metadata
 
 root node can be alternative too?
 
-The graph’s root node must be a result and its object value is used as recipe
-title.
+The graph’s root node must be a result. It contains yield (amount and unit) and
+title (object) of the recipe.
 
 > extractMetadata nodes edges = case walkRoot nodes edges of
-> 		[n@(i, Result title)] ->
-> 			Just $ (i, ("title", title)):foldl f [] (incomingNodes nodes edges n)
+> 		[n@(i, Result q@(Quantity _ _ title))] ->
+> 			Just $ (i, ("title", MetaStr title))
+> 				:(i, ("yield", MetaQty q))
+> 				:foldl f [] (incomingNodes nodes edges n)
 >		_ -> Nothing
 > 	where
 
@@ -85,8 +83,8 @@ to a list of those values. Annotations that are unparseable key-value pairs are
 added as recipe description instead.
 
 > 		f xs (i, Annotation s) = case parseMetadata s of
-> 				Left _ -> (i, ("description", s)):xs
-> 				Right kv -> (i, kv):xs
+> 				Left _ -> (i, ("description", MetaStr s)):xs
+> 				Right (k, v) -> (i, (k, MetaStr v)):xs
 > 		f xs _ = xs
 
 Key and value are separated by a colon. Keys must not contain whitespace or the
@@ -143,29 +141,31 @@ Check the metadata’s value format. I.e. yield/time must be quantity
 For instance a german language recipe for one person would look like this:
 
 > testMetadata = [
-> 	  cmpLintMeta "+foo >foobar (language: de) (yield: 1 _ Person) (x-app-key: value)"
+> 	  cmpLintMeta "+foo >1 Portion foobar (language: de) (x-app-key: value)"
 >		[]
->		(Just [(1, ("title", "foobar"))
->			, (2, ("language", "de"))
-> 			, (3, ("yield", "1 _ Person"))
-> 			, (4, ("x-app-key", "value"))])
+>		(Just [(1, ("title", MetaStr "foobar"))
+> 			, (1, ("yield", MetaQty (Quantity (Exact (AmountRatio (1%1))) "Portion" "foobar")))
+>			, (2, ("language", MetaStr "de"))
+> 			, (3, ("x-app-key", MetaStr "value"))])
 
 Unparseable annotations or unknown keys are linting errors:
 
 > 	, cmpLintMeta "+foo >foobar (unknown-key: value)"
 > 		[LintResult UnknownMetadataKey [2]]
-> 		(Just [(1, ("title", "foobar"))
-> 			, (2, ("unknown-key", "value"))])
+> 		(Just [(1, ("title", MetaStr "foobar"))
+>			, (1, ("yield", MetaQty (strQuantity "foobar")))
+> 			, (2, ("unknown-key", MetaStr "value"))])
 
 Root node annotations not containing a parseable key-value pair are assigned
 the key “description”.
 
 > 	, cmpLintMeta "+foo >foobar ( some description ) (another one: with colon) (another:     valid key-value)"
 > 		[LintResult UnknownMetadataKey [4]]
-> 		(Just [(1, ("title", "foobar"))
-> 			, (2, ("description", " some description "))
-> 			, (3, ("description", "another one: with colon"))
-> 			, (4, ("another", "valid key-value"))])
+> 		(Just [(1, ("title", MetaStr "foobar"))
+> 			, (1, ("yield", MetaQty (strQuantity "foobar")))
+> 			, (2, ("description", MetaStr " some description "))
+> 			, (3, ("description", MetaStr "another one: with colon"))
+> 			, (4, ("another", MetaStr "valid key-value"))])
 > 	]
 
 .. _time-is-a-tool:
@@ -398,10 +398,14 @@ Every lint test checks a single aspect of the graph.
 
 > cmpLint doc expect = withGraph doc (\nodes edges -> doc ~: sort (lint nodes edges) ~?= sort expect)
 
+
+> data Metadata = MetaQty Quantity | MetaStr String deriving (Show, Eq)
+
 > cmpLintMeta doc expectLint expectMeta = withGraph doc (\nodes edges -> doc ~: [
 > 		  sort (lint nodes edges) ~?= sort expectLint
-> 		, liftM sort (extractMetadata nodes edges) ~?= liftM sort expectMeta
+> 		, extractMetadata nodes edges ~?= expectMeta
 > 		])
+> strQuantity = Quantity (Exact (AmountStr "")) ""
 
 > test = [
 > 	  testConnectivity
