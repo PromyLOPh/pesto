@@ -3,7 +3,11 @@ Linting
 
 .. class:: nodoc
 
-> module Codec.Pesto.Lint (lint, test, parseMetadata, extractMetadata) where
+> module Codec.Pesto.Lint (lint
+> 	, test
+> 	, parseMetadata
+> 	, extractMetadata
+> 	, Metadata(..)) where
 > import Test.HUnit hiding (test, Node)
 > import Data.List (sort, isPrefixOf)
 > import Control.Applicative ((<*>), (<$>), (*>))
