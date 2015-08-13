@@ -197,7 +197,10 @@ By definition time is a tool and not an ingredient.
 > 	, cmpLint "&10 min [bar] >foo" []
 > 	]
 
-Only actions can be annotated with a time.
+Only actions can be annotated with a time. It can be used to indicate how long
+a certain action is *expected* to take (i.e. peeling potatoes takes two
+minutes) or how long the action is supposed to be executed (i.e. cook five
+minutes). More time annotations improve the software’s scheduling capabilities.
 
 > timeAnnotatesAction nodes edges = foldl f [] nodes
 > 	where
