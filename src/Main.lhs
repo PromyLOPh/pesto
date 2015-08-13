@@ -4,23 +4,27 @@ User interface
 .. class:: nodoc
 
 > module Main (main) where
-> import System.IO (hPrint, stderr)
 > import System.Environment (getArgs)
 > import Data.List (intercalate)
+> import Data.Monoid ((<>), mconcat)
 >
 > import Codec.Pesto.Parse (parse, Instruction (Ingredient), Quantity (..))
 > import Codec.Pesto.Graph (extract, toGraph, firstNodeId, resolveReferences)
-> import Codec.Pesto.Lint (lint, extractMetadata, Metadata(..))
-> import Codec.Pesto.Dot (toDot)
+> import Codec.Pesto.Lint (lint, extractMetadata, Metadata(..), LintResult (LintResult))
 > import Codec.Pesto.Serialize (serialize)
 
-The user-interface has different modes of operation. All of read a single
+The user-interface has different modes of operation. All of them read a single
 recipe from the standard input.
 
 > main = do
 > 	(op:_) <- getArgs
 > 	s <- getContents
 >	either malformedRecipe (run op) (parse s)
+
+> run "dot" = runDot
+> run "metadata" = runMeta
+> run "ingredients" = runIngredients
+> run _ = const (putStrLn "unknown operation")
 
 > malformedRecipe = print
 
@@ -33,27 +37,57 @@ recipe from the standard input.
 dot
 ^^^
 
-Convert recipe into GraphViz’ dot language. Example:
+Since each recipe is just a directed graph (digraph), GraphViz’ dot language
+can represent recipes as well. Example:
 
 .. code:: bash
 
 	cabal run --verbose=0 pesto dot < spaghetti.pesto | dot -Tpng > spaghetti.png
 
-.. class:: todo
+> runDot stream = putStrLn $ toDot dotNodes dotEdges
+> 	where
+> 		(nodes, edges) = streamToGraph stream
+> 		maxId = (maximum $ map fst nodes) + 1
+> 		(lintNodes, lintEdges) = unzip $ map (uncurry lintToNodesEdges)
+> 				$ zip [maxId..] (lint nodes edges)
+> 		dotNodes = concat [
+>				  [("node", [("fontname", "Roboto Semi-Light")])]
+> 				, map (\(a, label) -> (show a, [("label", serialize label)])) nodes
+> 				, lintNodes
+>				]
+> 		dotEdges = concat [
+> 				  map (both show) edges
+> 				, concat lintEdges
+> 				]
 
-add linting information to graph
+> lintToNodesEdges nodeid (LintResult t nodes) = let
+> 	n = (show nodeid, [("label", show t), ("color", "red")])
+> 	e = map (\i -> both show (nodeid, i)) nodes
+> 	in (n, e)
 
-> run "dot" stream = do
-> 		let (nodes, edges) = streamToGraph stream
-> 		hPrint stderr $ lint nodes edges
-> 		putStrLn $ toDot nodes edges
+> both f (a, b) = (f a, f b)
+
+> toDot nodes edges = "digraph a {"
+> 		<> mconcat (map nodeToDot nodes)
+> 		<> mconcat (map edgeToDot edges)
+> 		<> "}"
+> 	where
+> 		edgeToDot (a, b) = a <> " -> " <> b <> ";"
+>		nodeToDot (a, b) = a <> " [" <> mconcat (mapToDot b) <> "];"
+
+> mapToDot = map kvToDot
+> kvToDot (k, v) = k <> "=\"" <> quoteString v <> "\""
+> quoteString s = mconcat $ map quoteChar s
+> quoteChar '\n' = "\\n"
+> quoteChar '"' = "\\\""
+> quoteChar x = [x]
 
 metadata
 ^^^^^^^^
 
 Print metadata as key-value pairs, separated by ``=``.
 
-> run "metadata" stream = maybe (return ()) (mapM_ printMeta) $ uncurry extractMetadata $ streamToGraph stream
+> runMeta stream = maybe (return ()) (mapM_ printMeta) $ uncurry extractMetadata $ streamToGraph stream
 
 ingredients
 ^^^^^^^^^^^
@@ -61,11 +95,10 @@ ingredients
 Extract ingredients and print them in CSV format. This does not take
 alternatives into account yet.
 
-> run "ingredients" stream = mapM_ (putStrLn . csvQty) $ reverse $ foldl getIngredient [] stream
+> runIngredients stream = mapM_ (putStrLn . csvQty) $ reverse $ foldl getIngredient [] stream
 > 	where
 > 		getIngredient xs (_, Ingredient q) = q:xs
 > 		getIngredient xs _ = xs
-> run _ _ = putStrLn "unknown operation"
 
 > printMeta (_, (key, MetaStr value)) = putStrLn $ key ++ "=" ++ value
 > printMeta (_, (key, MetaQty q)) = putStrLn $ key ++ "=" ++ csvQty q

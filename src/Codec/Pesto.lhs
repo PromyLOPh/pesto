@@ -233,7 +233,6 @@ See https://github.com/PromyLOPh/rezepte for example recipes.
 .. include:: Pesto/Parse.lhs
 .. include:: Pesto/Graph.lhs
 .. include:: Pesto/Lint.lhs
-.. include:: Pesto/Dot.lhs
 .. include:: Pesto/Serialize.lhs
 
 Using this project

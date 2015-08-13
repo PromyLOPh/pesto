@@ -7,7 +7,8 @@ Linting
 > 	, test
 > 	, parseMetadata
 > 	, extractMetadata
-> 	, Metadata(..)) where
+> 	, Metadata(..)
+> 	, LintResult(..)) where
 > import Test.HUnit hiding (test, Node)
 > import Data.List (sort, isPrefixOf)
 > import Control.Applicative ((<*>), (<$>), (*>))
