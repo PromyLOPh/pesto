@@ -68,8 +68,9 @@ second vocabulary that has not been adopted widely yet.
 Most cooking-related software comes with their own recipe file format.
 Meal-Master_ is one example and, due to its age, a large amount of recipe files
 is `available in this format <http://www.ffts.com/recipes.htm>`_. There does
-not seem to be any official documentation for the format, but an inofficial
-`ABNF grammar`_ exists. A Meal-Master recipe template might look like this:
+not seem to be any official documentation for the format, but inofficial
+`ABNF grammar`_ and `format description <http://www.ffts.com/mmformat.txt>`_
+exist. A Meal-Master recipe template might look like this:
 
 .. code:: mealmaster
 
@@ -119,6 +120,18 @@ CookML_
 	Last updated in 2006 (version 1.0.4) for the german-language shareware
 	program Kalorio has a custom and restrictive licence that requires
 	attribution and forbids derivate works.
+
+And then there’s XML-based export formats for most currently maintained recipe
+managing software.
+
+`Living Cookbook`_
+	Uses a XML-based format called fdx version 1.1. There’s no specification to
+	be found, but a few examples__ are available and those are dated 2006.
+
+	__ http://livingcookbook.com/Resource/DownloadableRecipes
+`My CookBook`_
+	Uses the file extension .mcb. A specification `is available
+	<http://mycookbook-android.com/site/my-cookbook-xml-schema/>`_.
 KRecipes_
 	Uses its own export format. However there is no documentation whatsoever.
 Gourmet_
@@ -143,6 +156,8 @@ written down with a few operators and postfix notation. It does not separate
 ingredients and cooking instructions like every other syntax introduced before.
 Although Pesto is not a direct descendant of RxOL both share many ideas.
 
+microformats.org_ has a similar list of recipe interchange formats.
+
 .. _REML: http://reml.sourceforge.net/
 .. _eatdrinkfeelgood: https://web.archive.org/web/20070109085643/http://eatdrinkfeelgood.org/1.1/
 .. _RecipeML: http://www.formatdata.com/recipeml/index.html
@@ -158,6 +173,9 @@ Although Pesto is not a direct descendant of RxOL both share many ideas.
 .. _Gourmet: http://thinkle.github.io/gourmet/
 .. _KRecipes: http://krecipes.sourceforge.net/
 .. _Cordon Bleu: http://www.inf.unideb.hu/~bognar/ps_ek/cb_lang.ps
+.. _microformats.org: http://microformats.org/wiki/recipe-formats
+.. _Living Cookbook: http://livingcookbook.com/
+.. _My CookBook: http://mycookbook-android.com/
 
 .. There is a copy at http://diyhpl.us/~bryan/papers2/CompCook.html as well
 
