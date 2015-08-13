@@ -5,6 +5,11 @@ Pesto specification draft
 Pesto is a text-based human-editable and machine-transformable cooking recipe
 interchange format.
 
+.. warning::
+
+	This specification is work-in-progress and thus neither stable, consistent or
+	complete.
+
 .. class:: nodoc
 
 > module Codec.Pesto where
