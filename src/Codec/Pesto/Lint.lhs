@@ -15,6 +15,7 @@ Linting
 > import Text.Parsec hiding (parse)
 > import Data.Char (isSpace)
 > import Data.Ratio ((%))
+> import Data.Maybe (fromMaybe)
 >
 > import Codec.Pesto.Graph hiding (test)
 > import Codec.Pesto.Parse hiding (test)
@@ -146,10 +147,10 @@ Check the metadata’s value format. I.e. yield/time must be quantity
 For instance a german language recipe for one person would look like this:
 
 > testMetadata = [
-> 	  cmpLintMeta "+foo >1 Portion foobar (language: de) (x-app-key: value)"
+> 	  cmpLintMeta "+foo >1 ml foobar (language: de) (x-app-key: value)"
 >		[]
 >		(Just [(1, ("title", MetaStr "foobar"))
-> 			, (1, ("yield", MetaQty (Quantity (Exact (AmountRatio (1%1))) "Portion" "foobar")))
+> 			, (1, ("yield", MetaQty (Quantity (Exact (AmountRatio (1%1))) "ml" "foobar")))
 >			, (2, ("language", MetaStr "de"))
 > 			, (3, ("x-app-key", MetaStr "value"))])
 
@@ -233,9 +234,13 @@ accepted.
 
 > wellKnownUnit nodes _ = foldl f [] nodes
 > 	where
-> 		f xs (nodeid, Ingredient q) | (not . known) q =
-> 				LintResult UnitNotWellKnown [nodeid]:xs
-> 		f xs (nodeid, Tool q) | (not . known) q =
+> 		extractQty (Ingredient q) = Just q
+> 		extractQty (Tool q) = Just q
+> 		extractQty (Result q) = Just q
+> 		extractQty (Alternative q) = Just q
+> 		extractQty (Reference q) = Just q
+> 		extractQty _ = Nothing
+> 		f xs (nodeid, instr) | fromMaybe False (extractQty instr >>= (return . not . known)) =
 > 				LintResult UnitNotWellKnown [nodeid]:xs
 >		f xs _ = xs
 > 		known (Quantity _ unit _) = unit `elem` knownUnits
