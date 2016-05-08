@@ -345,7 +345,14 @@ Test helpers:
 > isLeft (Left _) = True
 > isLeft _ = False
 
+A generic parser error:
+
 > parseError = Left (newErrorUnknown (newPos "" 0 0))
+
+Compare output of parser ``f`` for string ``str`` with ``expected``. The
+expected result can be a parser error, which matches any actual parse error
+(first case).
+
 > cmpParser f str (Left _) = TestCase $ assertBool str $ isLeft $ runParser (f <* eof) () "" str
 > cmpParser f str expected = str ~: runParser (f <* eof) () "" str ~?= expected
 
