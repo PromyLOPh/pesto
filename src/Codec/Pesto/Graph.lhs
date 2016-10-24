@@ -23,7 +23,6 @@ Language semantics
 > import Data.Char (toLower)
 > import Data.List (sort, nub)
 > import Test.HUnit hiding (test, Node)
-> import Control.Applicative ((<$>))
 >
 > import Codec.Pesto.Parse hiding (test)
 

@@ -22,7 +22,6 @@ Language syntax
 > 	, spaces1
 > 	, notspace
 > 	) where
-> import Control.Applicative ((<*>), (<$>), (<*), (*>))
 > import Data.Char (isSpace)
 > import Data.Ratio ((%))
 > import Text.Parsec hiding (parse)
@@ -73,6 +72,7 @@ The pesto grammar has two instruction types: The first one begins with a
 start symbol (``start``) and consumes any character up to and including a
 terminating symbol (``end``), which can be escaped with a backslash (``\``).
 
+> betweenEscaped :: Char -> Char -> Parsec String () String
 > betweenEscaped start end =
 > 	   char start
 > 	*> many (try (char '\\' *> char end) <|> satisfy (/= end))
@@ -92,6 +92,7 @@ Here are examples for both:
 The second one starts with one identifying character, ignores the following
 whitespace characters and then consumes an object or a quantity.
 
+> oparg :: Char -> Parsec String () Instruction -> Parsec String () Instruction
 > oparg ident cont = char ident *> spaces *> cont
 > ingredient = oparg '+' (Ingredient <$> quantity)
 > tool = oparg '&' (Tool <$> quantity)

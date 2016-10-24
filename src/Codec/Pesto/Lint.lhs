@@ -11,7 +11,6 @@ Linting
 > 	, LintResult(..)) where
 > import Test.HUnit hiding (test, Node)
 > import Data.List (sort, isPrefixOf)
-> import Control.Applicative ((<*>), (<$>), (*>))
 > import Text.Parsec hiding (parse)
 > import Data.Char (isSpace)
 > import Data.Ratio ((%))

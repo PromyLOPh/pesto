@@ -6,7 +6,7 @@ User interface
 > module Main (main) where
 > import System.Environment (getArgs)
 > import Data.List (intercalate)
-> import Data.Monoid ((<>), mconcat)
+> import Data.Monoid ((<>))
 >
 > import Codec.Pesto.Parse (parse, Instruction (Ingredient), Quantity (..))
 > import Codec.Pesto.Graph (extract, toGraph, firstNodeId, resolveReferences)
