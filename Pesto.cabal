@@ -17,7 +17,7 @@ library
   exposed-modules:     Codec.Pesto, Codec.Pesto.Parse, Codec.Pesto.Graph, Codec.Pesto.Lint, Codec.Pesto.Serialize
   -- other-modules:       
   -- other-extensions:    
-  build-depends:       base >=4.8 && <4.9, HUnit, parsec >= 3.1.9
+  build-depends:       base >=4.8 && <4.10, HUnit, parsec >= 3.1.9
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Werror -Wall -fno-warn-missing-signatures
@@ -26,7 +26,7 @@ executable pesto
   main-is: Main.lhs
   hs-source-dirs:      src
   default-language:    Haskell2010
-  build-depends:       base >=4.8 && <4.9, HUnit, parsec >= 3.1.9
+  build-depends:       base >=4.8 && <4.10, HUnit, parsec >= 3.1.9
   ghc-options:         -Werror -Wall -fno-warn-missing-signatures
 
 test-suite pesto-test
@@ -34,13 +34,13 @@ test-suite pesto-test
   main-is: Test.lhs
   hs-source-dirs:      src
   default-language:    Haskell2010
-  build-depends:       base >=4.8 && <4.9, Pesto, HUnit, parsec >= 3.1.9
+  build-depends:       base >=4.8 && <4.10, Pesto, HUnit, parsec >= 3.1.9
   ghc-options:         -Werror -Wall -fno-warn-missing-signatures
 
 executable pesto-doc
   main-is: Doc.lhs
   hs-source-dirs:      src
   default-language:    Haskell2010
-  build-depends:       base >=4.8 && <4.9, pandoc >=1.14, highlighting-kate, blaze-html, filepath, containers
+  build-depends:       base >=4.8 && <4.10, pandoc >=1.14, highlighting-kate, blaze-html, filepath, containers
   ghc-options:         -Werror -Wall -fno-warn-missing-signatures
 
