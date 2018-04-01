@@ -1,3 +1,5 @@
+.. _language-semantics:
+
 Language semantics
 ------------------
 

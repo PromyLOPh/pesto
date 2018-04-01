@@ -18,13 +18,17 @@ About this document
 -------------------
 
 This section contains various information about this document. The `second
-section <motivation_>`_ motivates why inventing another file format is
-necessary, followed by the goals_ of Pesto. After a short Pesto `primer
-<introduction-by-example_>`_ intended for the casual user the language’s
-`syntax <language-syntax_>`_ and `semantics <language-semantics_>`_ are
-presented. The `linting section <linting_>`_ limits the language to useful
-cooking recipes.  Examples for user presentation of recipes and serialization
-follow.
+section`__ motivates why inventing another file format is necessary, followed
+by the goals_ of Pesto. After a short Pesto primer__ intended for the casual
+user the language’s syntax__ and semantics__ are presented. The `linting
+section`__ limits the language to useful cooking recipes.  Examples for user
+presentation of recipes and serialization follow.
+
+__ motivation_
+__ introduction-by-example_
+__ language-syntax_
+__ language-semantics_
+__ linting_
 
 Being a literate program this document is specification and reference
 implementation at the same time. The code is written in Haskell_ and uses the
@@ -216,6 +220,8 @@ ingredients or recipes itself. Nutrition data for each ingredient should be
 maintained in a separate database. Due to its minimal syntax Pesto is also not
 suitable for extensive guides on cooking or the usual chitchat found in cooking
 books.
+
+.. _introduction-by-example:
 
 Introduction by example
 -----------------------

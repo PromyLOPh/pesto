@@ -47,3 +47,7 @@ pre code {
 	border-radius: 0.66em;
 }
 
+.nodoc {
+	display: none;
+}
+

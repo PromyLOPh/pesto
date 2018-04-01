@@ -1,3 +1,5 @@
+.. _language-syntax:
+
 Language syntax
 ---------------
 
