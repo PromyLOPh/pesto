@@ -29,40 +29,43 @@ Language semantics
 > import Codec.Pesto.Parse hiding (test)
 
 The parser’s output, a stream of instructions, may contain multiple recipes. A
-recipe must start with the directive “pesto” and may end with “bonappetit”.
+recipe must start with the directive “pesto” and may end with “buonappetito”.
 This function extracts all recipes from the stream and removes both directives.
 
 - easily embed recipes into other documents
 
+> startDirective = Directive "pesto"
+> endDirective = Directive "buonappetito"
+
 > extract [] = []
-> extract (Directive "pesto":stream) = between:extract next
+> extract (s:stream) | s == startDirective = between:extract next
 > 	where
-> 		isEnd (Directive x) | x `elem` ["bonappetit", "pesto"] = True
+> 		isEnd x | x `elem` [startDirective, endDirective] = True
 > 		isEnd _ = False
 > 		(between, next) = break isEnd stream
 > extract (_:xs) = extract xs
 
 Start and end directive are removed from the extracted instructions.  The
-directive “bonappetit” is optional at the end of a stream.
+directive “buonappetito” is optional at the end of a stream.
 
 > testExtract = [
-> 	  extract [Directive "pesto", Directive "bonappetit"] ~?= [[]]
-> 	, extract [Directive "pesto", Action "foobar", Directive "bonappetit"] ~?= [[Action "foobar"]]
-> 	, extract [Directive "pesto"] ~?= [[]]
-> 	, extract [Directive "pesto", Directive "foobar"] ~?= [[Directive "foobar"]]
+> 	  extract [startDirective, endDirective] ~?= [[]]
+> 	, extract [startDirective, Action "foobar", endDirective] ~?= [[Action "foobar"]]
+> 	, extract [startDirective] ~?= [[]]
+> 	, extract [startDirective, Directive "foobar"] ~?= [[Directive "foobar"]]
 
 Instructions surrounding the start and end directive are removed.
 
-> 	, extract [Unknown "Something", Directive "pesto"] ~?= [[]]
-> 	, extract [Unknown "Something", Action "pour", Directive "pesto"] ~?= [[]]
-> 	, extract [Directive "pesto", Directive "bonappetit", Annotation "something"] ~?= [[]]
+> 	, extract [Unknown "Something", startDirective] ~?= [[]]
+> 	, extract [Unknown "Something", Action "pour", startDirective] ~?= [[]]
+> 	, extract [startDirective, endDirective, Annotation "something"] ~?= [[]]
 
 The stream may contain multiple recipes. The start directive also ends the
 previous recipe and starts a new one.
 
-> 	, extract [Directive "pesto", Action "pour", Directive "bonappetit", Action "foobar", Directive "pesto", Annotation "something"] ~?= [[Action "pour"], [Annotation "something"]]
-> 	, extract [Directive "pesto", Action "heat", Directive "pesto", Annotation "something"] ~?= [[Action "heat"], [Annotation "something"]]
-> 	, extract [Directive "pesto", Annotation "foobar", Directive "pesto", Directive "bonappetit"] ~?= [[Annotation "foobar"], []]
+> 	, extract [startDirective, Action "pour", endDirective, Action "foobar", startDirective, Annotation "something"] ~?= [[Action "pour"], [Annotation "something"]]
+> 	, extract [startDirective, Action "heat", startDirective, Annotation "something"] ~?= [[Action "heat"], [Annotation "something"]]
+> 	, extract [startDirective, Annotation "foobar", startDirective, endDirective] ~?= [[Annotation "foobar"], []]
 > 	]
 
 Each recipe’s stream of instructions drives a stack-based machine that transforms
