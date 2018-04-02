@@ -238,15 +238,35 @@ books.
 Introduction by example
 -----------------------
 
-So let’s start by introducing Pesto in a XXXnon-formal, XXX way: By example. We
-are now going to cook XXX. The following recipe contains all the information
-you need to do that.
+.. code::
 
-.. class:: todo
+	So let’s start by introducing Pesto by example. This text does not belong
+	to the recipe and is ignored by any software. The following line starts the
+	recipe:
 
-do it.
+	%pesto
 
-See https://github.com/PromyLOPh/rezepte for example recipes.
+	&pot
+	+1 l water
+	+salt
+	[boil]
+
+	+100 g penne
+	&10 min
+	[cook]
+
+	>1 serving pasta
+	(language: en)
+
+And that’s how you make pasta: Boil one liter of water in a pot with a little
+bit of salt. Then add 100 g penne, cook them for ten minutes and you get one
+serving pasta. That’s all.
+
+There’s more syntax available to express alternatives (either penne or
+tagliatelle), ranges (1–2 l water or approximately 1 liter water) and metadata.
+But now you can have a first peek at `my own recipe collection`_.
+
+.. _my own recipe collection: https://github.com/PromyLOPh/rezepte
 
 .. include:: Pesto/Parse.lhs
 .. include:: Pesto/Graph.lhs
@@ -263,11 +283,4 @@ three binaries.
 .. include:: ../Main.lhs
 .. include:: ../Test.lhs
 .. include:: ../Doc.lhs
-
-Final words
------------
-
-.. class:: todo
-
-Do we even need this?
 
