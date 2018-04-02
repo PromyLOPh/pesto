@@ -74,12 +74,20 @@ second vocabulary that has not been adopted widely yet.
 .. _schema.org: http://schema.org/Recipe
 .. _h-recipe: http://microformats.org/wiki/h-recipe
 
-Most cooking-related software comes with their own recipe file format.
-Meal-Master_ is one example and, due to its age, a large amount of recipe files
+.. _formats-by-software:
+
+Most cooking-related software comes with its own recipe file format. Some of
+them, due to their age, can be imported by other programs.
+
+Meal-Master_ is one of these widely supported formats. A huge trove of recipe files
 is `available in this format <http://www.ffts.com/recipes.htm>`_. There does
 not seem to be any official documentation for the format, but inofficial
 `ABNF grammar`_ and `format description <http://www.ffts.com/mmformat.txt>`_
 exist. A Meal-Master recipe template might look like this:
+
+.. _MasterCook: http://mastercook.com/
+.. _MXP: http://www.oocities.org/heartland/woods/2073/Appendix.htm
+.. _ABNF grammar: http://web.archive.org/web/20161002135718/http://www.wedesoft.de/anymeal-api/mealmaster.html
 
 .. code:: mealmaster
 
@@ -101,14 +109,40 @@ exist. A Meal-Master recipe template might look like this:
 
 Rezkonv_ aims to improve the Mealmaster format by lifting some of its character
 limits, adding new syntax and translating it to german. However the
-specification is available on request only. Early versions of MasterCook_
-used the MXP_ file format, but newer software versions use, beside a bunch of
-other file formats, the XML-based MX2.
+specification is available on request only.
+
+A second format some programs can import is MasterCook_’s MXP_ file format, as
+well as its XML-based successor MX2. And then there’s a whole bunch of
+more-or-less proprietary formats:
+
+`Living Cookbook`_
+	Uses a XML-based format called fdx version 1.1. There’s no specification to
+	be found, but a few examples__ are available and those are dated 2006.
+`My CookBook`_
+	Uses the file extension .mcb. A specification `is available
+	<http://mycookbook-android.com/site/my-cookbook-xml-schema/>`_.
+KRecipes_
+	Uses its own export format. However there is no documentation whatsoever.
+Gourmet_
+	The program’s export format suffers from the same problem. The only
+	document available is the `DTD
+	<https://github.com/thinkle/gourmet/blob/7715c6ef87ee8c106f0a021972cd70d61d83cadb/data/recipe.dtd>`_.
+CookML_
+	Last updated in 2006 (version 1.0.4) for the german-language shareware
+	program Kalorio has a custom and restrictive licence that requires
+	attribution and forbids derivate works.
+Paprika_
+	Cross-platform application, supports its own “emailed recipe format” and a
+	simple YAML-based format.
+
+__ http://livingcookbook.com/Resource/DownloadableRecipes
+.. _Paprika: https://paprikaapp.com/help/android/#importrecipes
 
 .. _xml-formats:
 
-In general XML seems to be the preferred markup language for a bunch of
-interchange formats created around 2005.
+Between 2002 and 2005 a bunch of XML-based exchange formats were created. They
+are not tied to a specific software, so none of them seems to be actively used
+nowadays:
 
 RecipeML_
 	Formerly known as DESSERT and released in 2002 (version 0.5). The
@@ -125,31 +159,12 @@ REML_
 `RecipeBook XML`_
 	Released 2005 as well and shared unter the terms of `CC by-sa`_ is not
 	available on the web any more.
-CookML_
-	Last updated in 2006 (version 1.0.4) for the german-language shareware
-	program Kalorio has a custom and restrictive licence that requires
-	attribution and forbids derivate works.
-
-And then there’s XML-based export formats for most currently maintained recipe
-managing software.
-
-`Living Cookbook`_
-	Uses a XML-based format called fdx version 1.1. There’s no specification to
-	be found, but a few examples__ are available and those are dated 2006.
-
-	__ http://livingcookbook.com/Resource/DownloadableRecipes
-`My CookBook`_
-	Uses the file extension .mcb. A specification `is available
-	<http://mycookbook-android.com/site/my-cookbook-xml-schema/>`_.
-KRecipes_
-	Uses its own export format. However there is no documentation whatsoever.
-Gourmet_
-	The program’s export format suffers from the same problem. The only
-	document available is the `DTD
-	<https://github.com/thinkle/gourmet/blob/7715c6ef87ee8c106f0a021972cd70d61d83cadb/data/recipe.dtd>`_.
 
 .. _CC by-sa: https://creativecommons.org/licenses/by-sa/2.5/
 
+.. _obscure-formats:
+
+Finally, a few non-XML or obscure exchange formats have been created in the past:
 YumML_ is an approach similar to those listed above, but based on YAML instead
 of XML. The specification has been removed from the web and is available
 through the Web Archive only.
@@ -171,10 +186,7 @@ microformats.org_ has a similar list of recipe interchange formats.
 .. _eatdrinkfeelgood: https://web.archive.org/web/20070109085643/http://eatdrinkfeelgood.org/1.1/
 .. _RecipeML: http://www.formatdata.com/recipeml/index.html
 .. _CookML: http://www.kalorio.de/index.php?Mod=Ac&Cap=CE&SCa=../cml/CookML_EN
-.. _Meal-Master: http://episoft.home.comcast.net/~episoft/
-.. _ABNF grammar: http://www.wedesoft.de/anymeal-api/mealmaster.html
-.. _MasterCook: http://mastercook.com/
-.. _MXP: http://www.oocities.org/heartland/woods/2073/Appendix.htm
+.. _Meal-Master: http://web.archive.org/web/20151029032924/http://episoft.home.comcast.net:80/~episoft/
 .. _RecipeBook XML: http://web.archive.org/web/20141101132332/http://www.happy-monkey.net/recipebook/
 .. _YumML: http://web.archive.org/web/20140703234140/http://vikingco.de/yumml.html
 .. _Rezkonv: http://www.rezkonv.de/software/rksuite/rkformat.html
