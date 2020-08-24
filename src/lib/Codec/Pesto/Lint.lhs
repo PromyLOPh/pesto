@@ -122,9 +122,8 @@ Both, title and description, are implicit.
 >			  "title"
 > 			, "description"
 
-The recipe’s language, as 2 character code (`ISO 639-1`__).
-
-__ http://www.loc.gov/standards/iso639-2/php/English_list.php
+The recipe’s language, as 2 character code (`ISO 639-1
+<http://www.loc.gov/standards/iso639-2/php/English_list.php>`_).
 
 > 			, "language"
 

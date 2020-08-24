@@ -280,7 +280,7 @@ This project uses cabal. It provides the Codec.Pesto library that implements
 the Pesto language as described in the previous sections. It also comes with
 three binaries.
 
-.. include:: ../Main.lhs
-.. include:: ../Test.lhs
-.. include:: ../Doc.lhs
+.. include:: ../../exe/Main.lhs
+.. include:: ../../exe/Test.lhs
+.. include:: ../../exe/Doc.lhs
 
