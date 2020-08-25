@@ -26,10 +26,9 @@ source code.
 > 		]
 > 	, readerStandalone = True }
 
-.. _Pandoc: http://www.pandoc.org/
 
-Pandoc_ outputs a single HTML5 page with syntax highlighting and MathJax for
-formulas.
+`Pandoc <http://www.pandoc.org/>`_ outputs a single HTML5 page with syntax
+highlighting and MathJax for formulas.
 
 > writeDoc tpl = writeHtml5String def {
 >	  writerTemplate = tpl

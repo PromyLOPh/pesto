@@ -1,3 +1,5 @@
+.. _linting:
+
 Linting
 -------
 
@@ -286,7 +288,7 @@ well…
 References
 ++++++++++
 
-All references must be resolved. An `earlier check <resultsused_>`_ makes sure
+All references must be resolved. An `earlier check <#resultsused>`_ makes sure
 all results and alternatives are referenced at some point.
 
 > referencesResolved nodes edges = foldl f [] nodes

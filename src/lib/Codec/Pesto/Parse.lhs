@@ -33,11 +33,10 @@ Language syntax
 >
 > import Codec.Pesto.Serialize (serialize)
 
-Pesto parses UTF-8_ encoded input data consisting of space-delimited
-instructions.  Every character within the Unicode whitespace class is
-considered a space.
+Pesto parses `UTF-8 <https://tools.ietf.org/html/rfc3629>`_ encoded input data
+consisting of space-delimited instructions.  Every character within the Unicode
+whitespace class is considered a space.
 
-.. _UTF-8: https://tools.ietf.org/html/rfc3629
 .. _spaces1:
 
 > stream = ((,) <$> getPosition <*> instruction) `sepEndBy` spaces1
@@ -251,8 +250,7 @@ Missing units must not be ommited. The version with underscore should be prefere
 >	]
 
 Units and objects are just strings. However units should be limited to
-`well-known metric units <well-known-units_>`_ and `some guidelines
-<objects-and-annotations_>`_ apply to Objects as well.
+`well-known metric units <#well-known-units>`_.
 
 > type Unit = String
 > unit = qstr

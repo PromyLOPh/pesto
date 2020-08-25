@@ -19,16 +19,17 @@ About this document
 
 This section contains various information about this document. The `second
 section`__ motivates why inventing another file format is necessary, followed
-by the goals_ of Pesto. After a short Pesto primer__ intended for the casual
+by the goals__ of Pesto. After a short Pesto primer__ intended for the casual
 user the language’s syntax__ and semantics__ are presented. The `linting
 section`__ limits the language to useful cooking recipes.  Examples for user
 presentation of recipes and serialization follow.
 
-__ motivation_
-__ introduction-by-example_
-__ language-syntax_
-__ language-semantics_
-__ linting_
+__ #motivation
+__ #goals
+__ #introduction-by-example
+__ #language-syntax
+__ #language-semantics
+__ #linting
 
 Being a literate program this document is specification and reference
 implementation at the same time. The code is written in Haskell_ and uses the
@@ -190,10 +191,10 @@ microformats.org_ has a similar list of recipe interchange formats.
 .. _RecipeBook XML: http://web.archive.org/web/20141101132332/http://www.happy-monkey.net/recipebook/
 .. _YumML: http://web.archive.org/web/20140703234140/http://vikingco.de/yumml.html
 .. _Rezkonv: http://www.rezkonv.de/software/rksuite/rkformat.html
-.. _RxOL: http://www.dodomagnifico.com/641/Recipes/CompCook.html
+.. _RxOL: http://web.archive.org/web/20150814041516/www.dodomagnifico.com/641/Recipes/CompCook.html
 .. _Gourmet: http://thinkle.github.io/gourmet/
 .. _KRecipes: http://krecipes.sourceforge.net/
-.. _Cordon Bleu: http://www.inf.unideb.hu/~bognar/ps_ek/cb_lang.ps
+.. _Cordon Bleu: http://web.archive.org/web/20090115210732/http://www.inf.unideb.hu/~bognar/ps_ek/cb_lang.ps
 .. _microformats.org: http://microformats.org/wiki/recipe-formats
 .. _Living Cookbook: http://livingcookbook.com/
 .. _My CookBook: http://mycookbook-android.com/
@@ -203,6 +204,8 @@ microformats.org_ has a similar list of recipe interchange formats.
 .. More interesting stuff:
 .. - http://blog.moertel.com/posts/2010-01-08-a-formal-language-for-recipes-brain-dump.html
 .. - http://www.dangermouse.net/esoteric/chef.html
+
+.. _goals:
 
 Goals
 -----

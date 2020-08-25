@@ -86,7 +86,7 @@ appear on the shopping list.
 
 The same happens for for tools. However they are not part of the final product,
 but used in the process of making it.  For instance they do not appear on the
-shopping list. `Time is a tool <time-is-a-tool_>`_.
+shopping list. `Time is a tool <#time-is-a-tool>`_.
 
 > 		f ctx (i, Tool _) = addToStack ctx i
 
@@ -112,7 +112,7 @@ adding optional or equivalent ingredients to a recipe (i.e. margarine or butter)
 
 References are similar to ingredients. They are used to add items from a
 workspace labeled with Result or Alternative. More on that `in the next section
-<references_>`_.
+<#references>`_.
 
 > 		f ctx (i, Reference _) = addToStack ctx i
 
@@ -189,6 +189,8 @@ Unknown directives or instructions are never connected to other nodes.
 > 	, cmpGraph "invalid" []
 > 	]
 
+.. _references:
+
 References
 ++++++++++
 
@@ -233,7 +235,7 @@ References can use amounts and units.
 
 There are a few cases that do not make sense here (like loops or multiple
 results with the same name). They are permitted at this stage, but rejected
-`later <reject-loops_>`_.
+`later <#reject-loops>`_.
 
 > 	, cmpGraphRef "*foobar |foobar >foobar" [(1, 0), (2, 0)]
 > 	, cmpGraphRef "|foobar *foobar >foobar *foobar" [(0, 1), (0, 3), (2, 1), (2, 3)]
